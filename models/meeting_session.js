@@ -1,17 +1,17 @@
-const { Sequelize, DataTypes, UUIDV4 } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('./index');
 
-const MeetingSession = db.sequelize.defince("MeetingSession", {
+const MeetingSession = db.sequelize.define("MeetingSession", { 
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: UUIDV4,
+		defaultValue: DataTypes.UUIDV4, 
 		primaryKey: true,
 	},
 	meeting_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "Meeting",
+			model: "meetings", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -40,7 +40,6 @@ const MeetingSession = db.sequelize.defince("MeetingSession", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	},
-);
+	});
 
 module.exports = MeetingSession;

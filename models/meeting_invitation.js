@@ -1,17 +1,17 @@
-const { Sequelize, DataTypes, UUIDV4, DatabaseError } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('./index');
 
 const MeetingInvitation = db.sequelize.define("MeetingInvitation", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: UUIDV4,
+		defaultValue: DataTypes.UUIDV4, 
 		primaryKey: true,
 	},
 	meeting_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "Meeting",
+			model: "meetings", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -21,7 +21,7 @@ const MeetingInvitation = db.sequelize.define("MeetingInvitation", {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "User",
+			model: "users", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -46,11 +46,10 @@ const MeetingInvitation = db.sequelize.define("MeetingInvitation", {
 	},
 },
 	{
-		tableName: "meeging_invitations",
+		tableName: "meeting_invitations", 
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	},
-);
+	});
 
 module.exports = MeetingInvitation;

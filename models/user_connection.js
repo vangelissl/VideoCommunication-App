@@ -1,17 +1,17 @@
-const { Sequelize, DataTypes, UUIDV4, DatabaseError } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('./index');
 
-const UserConnection = db.sequelize.define("UserConection", {
+const UserConnection = db.sequelize.define("UserConnection", { 
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: UUIDV4,
+		defaultValue: DataTypes.UUIDV4, 
 		primaryKey: true,
 	},
 	user_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "User",
+			model: "users", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -21,7 +21,7 @@ const UserConnection = db.sequelize.define("UserConection", {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "MeetingSession",
+			model: "meeting_sessions", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -69,7 +69,6 @@ const UserConnection = db.sequelize.define("UserConection", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	},
-);
+	});
 
 module.exports = UserConnection;

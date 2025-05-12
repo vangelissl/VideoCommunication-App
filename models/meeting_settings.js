@@ -1,17 +1,17 @@
-const { Sequelize, DataTypes, UUIDV4, UUID } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('./index');
 
 const MeetingSettings = db.sequelize.define("MeetingSettings", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: UUIDV4,
+		defaultValue: DataTypes.UUIDV4, 
 		primaryKey: true,
 	},
 	meeting_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "Meeting",
+			model: "meetings", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -27,7 +27,7 @@ const MeetingSettings = db.sequelize.define("MeetingSettings", {
 		allowNull: false,
 		defaultValue: false,
 	},
-	chat_ebabled: {
+	chat_enabled: { 
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
 		defaultValue: true,
@@ -53,7 +53,6 @@ const MeetingSettings = db.sequelize.define("MeetingSettings", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	},
-);
+	});
 
 module.exports = MeetingSettings;

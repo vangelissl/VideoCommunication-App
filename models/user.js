@@ -12,6 +12,11 @@ const User = db.sequelize.define('User', {
 		allowNull: false,
 		unique: true,
 	},
+	role: {
+		type: DataTypes.ENUM('admin', 'user'),
+		allowNull: false,
+		defaultValue: 'user',
+	},
 	email: {
 		type: DataTypes.STRING,
 		allowNull: false,
@@ -32,15 +37,14 @@ const User = db.sequelize.define('User', {
 	is_active: {
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
-		defaultValue: DataTypes.BOOLEAN,
+		defaultValue: true, 
 	},
 },
 	{
-		tableName: 'Users',
+		tableName: 'users', 
 		timestamps: true,
 		createdAt: 'created_at',
 		updatedAt: 'updated_at'
-	}
-);
+	});
 
 module.exports = User;

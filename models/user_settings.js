@@ -1,17 +1,17 @@
-const { Sequelize, DataTypes, UUIDV4, UUID } = require('sequelize');
+const { DataTypes, UUIDV4 } = require('sequelize');
 const db = require('./index');
 
 const UserSettings = db.sequelize.define("UserSettings", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: UUIDV4,
+		defaultValue: DataTypes.UUIDV4, 
 		primaryKey: true,
 	},
 	user_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
-		reference: {
-			model: "User",
+		references: { 
+			model: "users", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -30,6 +30,7 @@ const UserSettings = db.sequelize.define("UserSettings", {
 	notification_preferences: {
 		type: DataTypes.JSONB,
 		allowNull: false,
+		defaultValue: {}, 
 	},
 	time_zone: {
 		type: DataTypes.STRING,
@@ -42,7 +43,6 @@ const UserSettings = db.sequelize.define("UserSettings", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	},
-);
+	});
 
 module.exports = UserSettings;

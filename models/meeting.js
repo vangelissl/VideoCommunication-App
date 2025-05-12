@@ -5,14 +5,14 @@ const db = require('./index');
 const Meeting = db.sequelize.define("Meeting", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: UUIDV4,
+		defaultValue: DataTypes.UUIDV4, 
 		primaryKey: true
 	},
 	host_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: 'User',
+			model: 'users', 
 			key: 'id',
 		},
 		onDelete: 'CASCADE',
@@ -23,14 +23,13 @@ const Meeting = db.sequelize.define("Meeting", {
 		allowNull: true,
 	},
 	description: {
-		type: DataTypes.STRING,
+		type: DataTypes.TEXT, 
 		allowNull: true,
 	},
 	meeting_link: {
-		type: VIRTUAL,
-		get() {
-			return `/room/${id}`;
-		}
+		type: DataTypes.STRING, 
+		allowNull: false,
+		unique: true,
 	},
 	meeting_password: {
 		type: DataTypes.STRING,
@@ -49,7 +48,7 @@ const Meeting = db.sequelize.define("Meeting", {
 		type: DataTypes.DATE,
 		allowNull: true,
 	},
-	is_reccurring: {
+	is_recurring: { 
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
 		defaultValue: false,
@@ -61,7 +60,7 @@ const Meeting = db.sequelize.define("Meeting", {
 	max_participants: {
 		type: DataTypes.INTEGER,
 		allowNull: false,
-		defaultValue: 30,
+		defaultValue: 100, 
 	},
 	is_active: {
 		type: DataTypes.BOOLEAN,
@@ -70,11 +69,10 @@ const Meeting = db.sequelize.define("Meeting", {
 	},
 },
 	{
-		tableName: "Meetings",
+		tableName: "meetings", 
 		timestamps: true,
 		createdAt: "created_at",
-		udpatedAt: "updated_at",
-	}
-);
+		updatedAt: "updated_at", 
+	});
 
 module.exports = Meeting;

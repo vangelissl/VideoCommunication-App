@@ -1,18 +1,18 @@
-const { Sequelize, DataTypes, UUIDV4, UUID } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('./index');
 
 
 const PrivateChatRoomParticipant = db.sequelize.define("PrivateChatRoomParticipant", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: UUIDV4,
+		defaultValue: DataTypes.UUIDV4, 
 		primaryKey: true,
 	},
 	room_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "PrivateChatRoom",
+			model: "private_chat_rooms", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -22,7 +22,7 @@ const PrivateChatRoomParticipant = db.sequelize.define("PrivateChatRoomParticipa
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "User",
+			model: "users", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -41,8 +41,7 @@ const PrivateChatRoomParticipant = db.sequelize.define("PrivateChatRoomParticipa
 		tableName: "private_chat_room_participants",
 		timestamps: true,
 		createdAt: "created_at",
-		updatedAt: "udpated_at",
-	},
-);
+		updatedAt: "updated_at", 
+	});
 
 module.exports = PrivateChatRoomParticipant;

@@ -1,18 +1,17 @@
-const { Sequelize, DataTypes, UUIDV4 } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('./index');
-const { defaultValueSchemable } = require('sequelize/lib/utils');
 
 const PublicChatMessage = db.sequelize.define("PublicChatMessage", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: UUIDV4,
+		defaultValue: DataTypes.UUIDV4,
 		primaryKey: true,
 	},
 	meeting_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "Meeting",
+			model: "meetings",
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -22,7 +21,7 @@ const PublicChatMessage = db.sequelize.define("PublicChatMessage", {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "User",
+			model: "users",
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -47,8 +46,7 @@ const PublicChatMessage = db.sequelize.define("PublicChatMessage", {
 		tableName: "public_chat_messages",
 		timestamps: true,
 		createdAt: "created_at",
-		updated_At: "udpated_at",
-	},
-); 
+		updatedAt: "updated_at",
+	});
 
 module.exports = PublicChatMessage;

@@ -1,19 +1,17 @@
-const { Sequelize, DataTypes, UUIDV4, VIRTUAL, UUID } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('./index');
-const { defaultValueSchemable } = require('sequelize/lib/utils');
-const PrivateChatMessage = require('./private_chat_message');
 
 const PrivateChatRoom = db.sequelize.define("PrivateChatRoom", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: UUIDV4,
+		defaultValue: DataTypes.UUIDV4, 
 		primaryKey: true,
 	},
 	creator_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "User",
+			model: "users", 
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -30,7 +28,6 @@ const PrivateChatRoom = db.sequelize.define("PrivateChatRoom", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	},
-);
+	});
 
 module.exports = PrivateChatRoom;
