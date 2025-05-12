@@ -58,4 +58,7 @@ const MeetingParticipant = db.sequelize.define("MeetingParticipant", {
 		updatedAt: "updated_at",
 	});
 
+MeetingParticipant.belongsTo(Meeting, {foreignKey: "meeting_id", as: "meeting"});
+MeetingParticipant.belongsTo(User, {foreignKey: "user_id", as: "user"});
+
 module.exports = MeetingParticipant;

@@ -1,6 +1,9 @@
 const { DataTypes } = require('sequelize');
 const db = require('./index');
 
+const User = require("./user");
+
+
 const RefreshToken = db.sequelize.define("RefreshToken", {
 	id: {
 		type: DataTypes.UUID,
@@ -32,5 +35,7 @@ const RefreshToken = db.sequelize.define("RefreshToken", {
 		createdAt: "created_at",
 		updatedAt: "updated_at",
 	});
+
+RefreshToken.belongsTo(User, {foreignKey: "user_id", as: "user"});
 
 module.exports = RefreshToken;

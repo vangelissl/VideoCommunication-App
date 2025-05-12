@@ -1,6 +1,9 @@
 const { DataTypes } = require('sequelize');
 const db = require('./index');
 
+const Meeting = require("./meeting");
+
+
 const MeetingSettings = db.sequelize.define("MeetingSettings", {
 	id: {
 		type: DataTypes.UUID,
@@ -54,5 +57,7 @@ const MeetingSettings = db.sequelize.define("MeetingSettings", {
 		createdAt: "created_at",
 		updatedAt: "updated_at",
 	});
+
+MeetingSettings.belongsTo(Meeting, {foreignKey: "meeting_id", as: "meeting"});
 
 module.exports = MeetingSettings;

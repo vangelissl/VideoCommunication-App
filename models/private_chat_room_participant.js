@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const db = require('./index');
 
 const User = require('./user');
-const PrivateChatRoomParticipant = require('./private_chat_room_participant');
+const PrivateChatRoom = require("./private_chat_room");
 
 
 const PrivateChatRoomParticipant = db.sequelize.define("PrivateChatRoomParticipant", {
@@ -47,8 +47,7 @@ const PrivateChatRoomParticipant = db.sequelize.define("PrivateChatRoomParticipa
 		updatedAt: "updated_at",
 	});
 
-PrivateChatRoom.belongsTo(User, { foreignKey: 'creator_id', as: 'creator' });
-PrivateChatRoom.hasMany(PrivateChatRoomParticipant, { foreignKey: 'room_id', as: 'participants' });
-PrivateChatRoom.hasMany(PrivateChatMessage, { foreignKey: 'room_id', as: 'messages' });
+PrivateChatRoomParticipant.belongsTo(User, {foreignKey: "user_id", as: "user"});
+PrivateChatRoomParticipant.belongsTo(PrivateChatRoom, {foreignKey: "room_id", as: "chatRoom"});
 
 module.exports = PrivateChatRoomParticipant;

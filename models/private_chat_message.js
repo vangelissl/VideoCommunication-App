@@ -1,6 +1,10 @@
 const { DataTypes } = require('sequelize');
 const db = require('./index');
 
+const PrivateChatRoom = require("./private_chat_room");
+const User = require("./user");
+
+
 const PrivateChatMessage = db.sequelize.define("PrivateChatMessage", {
 	id: {
 		type: DataTypes.UUID,
@@ -48,5 +52,8 @@ const PrivateChatMessage = db.sequelize.define("PrivateChatMessage", {
 		createdAt: "created_at",
 		updatedAt: "updated_at",
 	});
+
+PrivateChatMessage.belongsTo(PrivateChatRoom, {foreignKey: "room_id", as: "chatRoom"});
+PrivateChatMessage.belongsTo(User, {foreignKey: "sender_id", as: "sender"});
 
 module.exports = PrivateChatMessage;
