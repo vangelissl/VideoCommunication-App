@@ -5,36 +5,36 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const { Sequelize } = require('sequelize');
+
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const app = express();
 
+
 // Connect to db
-const { Sequelize } = require('sequelize');
-
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: {
-      require: true,           // Enforce SSL
-      rejectUnauthorized: false // Allow self-signed certificates 
+async function connectToDatabase() {
+  const sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,           // Enforce SSL
+        rejectUnauthorized: false // Allow self-signed certificates 
+      },
     },
-  },
-});
+  });
 
-// Test connection to db
-async function testDbConnection() {
   try {
     await sequelize.authenticate();
     console.log('Connection has been established successfully.');
+
+    return sequelize;
   } catch (error) {
     console.error('Unable to connect to the database:', error);
   }
 }
-
-testDbConnection();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
