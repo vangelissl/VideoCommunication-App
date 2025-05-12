@@ -1,0 +1,46 @@
+const { Sequelize, DataTypes, UUIDV4 } = require('sequelize');
+const db = require('./index');
+
+const MeetingSession = db.sequelize.defince("MeetingSession", {
+	id: {
+		type: DataTypes.UUID,
+		defaultValue: UUIDV4,
+		primaryKey: true,
+	},
+	meeting_id: {
+		type: DataTypes.UUID,
+		allowNull: false,
+		references: {
+			model: "Meeting",
+			key: "id",
+		},
+		onDelete: "CASCADE",
+		onUpdate: "CASCADE",
+	},
+	start_time: {
+		type: DataTypes.DATE,
+		allowNull: false,
+	},
+	end_time: {
+		type: DataTypes.DATE,
+		allowNull: true,
+	},
+	num_participants: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+		defaultValue: 0,
+	},
+	recording_url: {
+		type: DataTypes.STRING,
+		allowNull: true,
+	},
+},
+	{
+		tableName: "meeting_sessions",
+		timestamps: true,
+		createdAt: "created_at",
+		updatedAt: "updated_at",
+	},
+);
+
+module.exports = MeetingSession;
