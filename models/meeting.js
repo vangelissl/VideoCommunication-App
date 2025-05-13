@@ -1,12 +1,5 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const db = require('./index');
-
-const User = require('./user');
-const MeetingParticipant = require('./meeting_participant');
-const PublicChatMessage = require('./public_chat_message');
-const MeetingSession = require('./meeting_session');
-const MeetingSettings = require('./meeting_settings');
-const MeetingInvitation = require('./meeting_invitation');
+import { DataTypes, Sequelize } from 'sequelize'
+import db from './db.js'
 
 
 const Meeting = db.sequelize.define("Meeting", {
@@ -36,7 +29,7 @@ const Meeting = db.sequelize.define("Meeting", {
 	meeting_link: {
 		type: DataTypes.VIRTUAL,
 		get() {
-			return `/room/${this.id}`; 
+			return `/room/${this.id}`;
 		},
 	},
 	meeting_password: {
@@ -81,13 +74,7 @@ const Meeting = db.sequelize.define("Meeting", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	});
+	}
+);
 
-Meeting.belongsTo(User, { foreignKey: 'host_id', as: 'host' });
-Meeting.hasMany(MeetingParticipant, { foreignKey: 'meeting_id', as: 'participants' });
-Meeting.hasMany(PublicChatMessage, { foreignKey: 'meeting_id', as: 'chatMessages' });
-Meeting.hasMany(MeetingSession, { foreignKey: 'meeting_id', as: 'sessions' });
-Meeting.hasOne(MeetingSettings, { foreignKey: 'meeting_id', as: 'settings' });
-Meeting.hasMany(MeetingInvitation, { foreignKey: 'meeting_id', as: 'invitations' });
-
-module.exports = Meeting;
+export default Meeting;

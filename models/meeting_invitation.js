@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const db = require('./index');
+import { DataTypes } from 'sequelize'
+import db from './db.js'
 
 const MeetingInvitation = db.sequelize.define("MeetingInvitation", {
 	id: {
@@ -30,8 +30,11 @@ const MeetingInvitation = db.sequelize.define("MeetingInvitation", {
 	recipient_email: {
 		type: DataTypes.STRING,
 		allowNull: false,
+		validate: {
+			isEmail: true,
+		},
 	},
-	invitation_status: {
+	status: {
 		type: DataTypes.ENUM('pending', 'accepted', 'declined'),
 		allowNull: false,
 		defaultValue: 'pending',
@@ -50,6 +53,7 @@ const MeetingInvitation = db.sequelize.define("MeetingInvitation", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	});
+	}
+);
 
-module.exports = MeetingInvitation;
+export default MeetingInvitation;

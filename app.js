@@ -1,40 +1,30 @@
-require('dotenv').config({ path: '.env' });
+import 'dotenv/config';
+import createError from 'http-errors';
+import express from 'express';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
 
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
-const { Sequelize } = require('sequelize');
+import indexRouter from './routes/index.js';
+import usersRouter from './routes/users.js';
+import db from './models/db.js'
 
-
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
 
 const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-
-// Connect to db
-async function connectToDatabase() {
-  const sequelize = new Sequelize(process.env.DATABASE_URL, {
-    dialect: 'postgres',
-    dialectOptions: {
-      ssl: {
-        require: true,           // Enforce SSL
-        rejectUnauthorized: false // Allow self-signed certificates 
-      },
-    },
-  });
-
+async function connectDb() {
   try {
-    await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-
-    return sequelize;
+    await db.initialize();
+    console.log('Database initialized, server starting...');
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    console.error('Failed to initialize database:', error);
+    process.exit(1);
   }
 }
+
+await connectDb();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -65,4 +55,4 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+export default app;

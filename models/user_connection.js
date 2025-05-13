@@ -1,21 +1,18 @@
-const { DataTypes } = require('sequelize');
-const db = require('./index');
-
-const User = require("./user");
-const MeetingSession = require("./meeting_session");
+import { DataTypes } from 'sequelize'
+import db from './db.js'
 
 
-const UserConnection = db.sequelize.define("UserConnection", { 
+const UserConnection = db.sequelize.define("UserConnection", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: DataTypes.UUIDV4, 
+		defaultValue: DataTypes.UUIDV4,
 		primaryKey: true,
 	},
 	user_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "users", 
+			model: "users",
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -25,7 +22,7 @@ const UserConnection = db.sequelize.define("UserConnection", {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "meeting_sessions", 
+			model: "meeting_sessions",
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -39,7 +36,7 @@ const UserConnection = db.sequelize.define("UserConnection", {
 		type: DataTypes.STRING,
 		allowNull: false,
 	},
-	connection_status: {
+	status: {
 		type: DataTypes.ENUM('connected', 'disconnected'),
 		allowNull: false,
 		defaultValue: 'connected',
@@ -73,9 +70,7 @@ const UserConnection = db.sequelize.define("UserConnection", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	});
+	}
+);
 
-UserConnection.belongsTo(User, {foreignKey: "user_id", as: "user"});
-UserConnection.belongsTo(MeetingSession, {foreignKey: "meeting_session_id", as: "meetingSession"});
-
-module.exports = UserConnection;
+export default UserConnection;

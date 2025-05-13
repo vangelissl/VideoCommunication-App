@@ -1,7 +1,5 @@
-const { DataTypes, UUIDV4 } = require('sequelize');
-const db = require('./index');
-
-const User = require("./user");
+import { DataTypes } from 'sequelize'
+import db from './db.js'
 
 
 const UserSettings = db.sequelize.define("UserSettings", {
@@ -46,8 +44,7 @@ const UserSettings = db.sequelize.define("UserSettings", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	});
+	}
+);
 
-UserSettings.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
-
-module.exports = UserSettings;
+export default UserSettings;

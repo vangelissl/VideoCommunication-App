@@ -1,8 +1,5 @@
-const { DataTypes } = require('sequelize');
-const db = require('./index');
-
-const User = require("./user");
-const Meeting = require("./meeting");
+import { DataTypes } from 'sequelize'
+import db from './db.js'
 
 
 const PublicChatMessage = db.sequelize.define("PublicChatMessage", {
@@ -35,6 +32,13 @@ const PublicChatMessage = db.sequelize.define("PublicChatMessage", {
 		type: DataTypes.TEXT,
 		allowNull: false,
 	},
+	file_url: {
+		type: DataTypes.STRING,
+		allowNull: true,
+		validate: {
+			isUrl: true,
+		},
+	},
 	is_pinned: {
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
@@ -51,9 +55,7 @@ const PublicChatMessage = db.sequelize.define("PublicChatMessage", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	});
+	}
+);
 
-PublicChatMessage.belongsTo(Meeting, {foreignKey: "meeting_id", as: "currentMeeting"});
-PublicChatMessage.belongsTo(User, {foreignKey: "sender_id", as: "sender"});
-
-module.exports = PublicChatMessage;
+export default PublicChatMessage;

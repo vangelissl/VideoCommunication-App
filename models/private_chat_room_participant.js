@@ -1,8 +1,5 @@
-const { DataTypes } = require('sequelize');
-const db = require('./index');
-
-const User = require('./user');
-const PrivateChatRoom = require("./private_chat_room");
+import { DataTypes } from 'sequelize'
+import db from './db.js'
 
 
 const PrivateChatRoomParticipant = db.sequelize.define("PrivateChatRoomParticipant", {
@@ -45,9 +42,7 @@ const PrivateChatRoomParticipant = db.sequelize.define("PrivateChatRoomParticipa
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	});
+	}
+);
 
-PrivateChatRoomParticipant.belongsTo(User, {foreignKey: "user_id", as: "user"});
-PrivateChatRoomParticipant.belongsTo(PrivateChatRoom, {foreignKey: "room_id", as: "chatRoom"});
-
-module.exports = PrivateChatRoomParticipant;
+export default PrivateChatRoomParticipant;

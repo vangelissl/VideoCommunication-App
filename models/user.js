@@ -1,18 +1,9 @@
 'use strict';
 
-const { DataTypes } = require('sequelize');
-const db = require('./index');
+import { hashPassword } from "../services/password_encryption.js"
 
-const Meeting = require('./meeting');
-const UserSettings = require('./user_settings');
-const RefreshToken = require('./refresh_token');
-const MeetingParticipant = require('./meeting_participant');
-const PublicChatMessage = require('./public_chat_message');
-const PrivateChatMessage = require('./private_chat_message');
-const PrivateChatRoom = require('./private_chat_room');
-const PrivateChatRoomParticipant = require('./private_chat_room_participant');
-const UserConnection = require('./user_connection');
-const MeetingInvitation = require('./meeting_invitation');
+import { DataTypes } from 'sequelize'
+import db from './db.js'
 
 
 const User = db.sequelize.define('User', {
@@ -35,10 +26,16 @@ const User = db.sequelize.define('User', {
 		type: DataTypes.STRING,
 		allowNull: false,
 		unique: true,
+		validate: {
+			isEmail: true,
+		}
 	},
-	password: {
+	password_hash: {
 		type: DataTypes.STRING,
 		allowNull: false,
+		validate: {
+			is: /^[0-9a-f]{50,}$/i
+		},
 	},
 	first_name: {
 		type: DataTypes.STRING,
@@ -55,21 +52,21 @@ const User = db.sequelize.define('User', {
 	},
 },
 	{
+		hooks: {
+			beforeCreate: async (user) => {
+				user.password_hash = await hashPassword(user.password_hash);
+			},
+			beforeUpdate: async (user) => {
+				if (user.changed('password_hash')) {
+					user.password_hash = await hashPassword(user.password_hash);
+				}
+			}
+		},
 		tableName: 'users',
 		timestamps: true,
 		createdAt: 'created_at',
 		updatedAt: 'updated_at'
-	});
+	}
+);
 
-User.hasMany(Meeting, { foreignKey: 'host_id', as: 'hostedMeetings' });
-User.hasOne(UserSettings, { foreignKey: 'user_id', as: 'settings' });
-User.hasMany(RefreshToken, { foreignKey: 'user_id', as: 'refreshTokens' });
-User.hasMany(MeetingParticipant, { foreignKey: 'user_id', as: 'meetingParticipations' });
-User.hasMany(PublicChatMessage, { foreignKey: 'sender_id', as: 'publicMessages' });
-User.hasMany(PrivateChatMessage, { foreignKey: 'sender_id', as: 'privateMessages' });
-User.hasMany(PrivateChatRoom, { foreignKey: 'creator_id', as: 'createdChatRooms' });
-User.hasMany(PrivateChatRoomParticipant, { foreignKey: 'user_id', as: 'chatRoomParticipations' });
-User.hasMany(UserConnection, { foreignKey: 'user_id', as: 'connections' });
-User.hasMany(MeetingInvitation, { foreignKey: 'sender_id', as: 'sentInvitations' });
-
-module.exports = User;
+export default User;

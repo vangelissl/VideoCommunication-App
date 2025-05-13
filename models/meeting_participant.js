@@ -1,17 +1,18 @@
-const { DataTypes } = require('sequelize');
-const db = require('./index');
+import { DataTypes } from 'sequelize'
+import db from './db.js'
+
 
 const MeetingParticipant = db.sequelize.define("MeetingParticipant", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: DataTypes.UUIDV4, 
+		defaultValue: DataTypes.UUIDV4,
 		primaryKey: true,
 	},
 	meeting_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "meetings", 
+			model: "meetings",
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -21,7 +22,7 @@ const MeetingParticipant = db.sequelize.define("MeetingParticipant", {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "users", 
+			model: "users",
 			key: "id",
 		},
 		onDelete: "CASCADE",
@@ -56,9 +57,7 @@ const MeetingParticipant = db.sequelize.define("MeetingParticipant", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	});
+	}
+);
 
-MeetingParticipant.belongsTo(Meeting, {foreignKey: "meeting_id", as: "meeting"});
-MeetingParticipant.belongsTo(User, {foreignKey: "user_id", as: "user"});
-
-module.exports = MeetingParticipant;
+export default MeetingParticipant;

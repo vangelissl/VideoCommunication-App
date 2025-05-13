@@ -1,21 +1,18 @@
-const { DataTypes } = require('sequelize');
-const db = require('./index');
-
-const PrivateChatRoom = require("./private_chat_room");
-const User = require("./user");
+import { DataTypes } from 'sequelize'
+import db from './db.js'
 
 
 const PrivateChatMessage = db.sequelize.define("PrivateChatMessage", {
 	id: {
 		type: DataTypes.UUID,
-		defaultValue: DataTypes.UUIDV4, 
+		defaultValue: DataTypes.UUIDV4,
 		primaryKey: true,
 	},
 	room_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: 'private_chat_rooms', 
+			model: 'private_chat_rooms',
 			key: 'id',
 		},
 		onDelete: 'CASCADE',
@@ -25,7 +22,7 @@ const PrivateChatMessage = db.sequelize.define("PrivateChatMessage", {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: 'users', 
+			model: 'users',
 			key: 'id',
 		},
 		onDelete: 'CASCADE',
@@ -35,12 +32,12 @@ const PrivateChatMessage = db.sequelize.define("PrivateChatMessage", {
 		type: DataTypes.TEXT,
 		allowNull: false,
 	},
-	is_read: { 
+	is_read: {
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
 		defaultValue: false,
 	},
-	is_deleted: { 
+	is_deleted: {
 		type: DataTypes.BOOLEAN,
 		allowNull: false,
 		defaultValue: false,
@@ -51,9 +48,7 @@ const PrivateChatMessage = db.sequelize.define("PrivateChatMessage", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	});
+	}
+);
 
-PrivateChatMessage.belongsTo(PrivateChatRoom, {foreignKey: "room_id", as: "chatRoom"});
-PrivateChatMessage.belongsTo(User, {foreignKey: "sender_id", as: "sender"});
-
-module.exports = PrivateChatMessage;
+export default PrivateChatMessage;

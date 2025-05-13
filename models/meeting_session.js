@@ -1,8 +1,5 @@
-const { DataTypes } = require('sequelize');
-const db = require('./index');
-
-const Meeting = require('./meeting');
-const UserConnection = require('./user_connection');
+import { DataTypes } from 'sequelize'
+import db from './db.js'
 
 
 const MeetingSession = db.sequelize.define("MeetingSession", {
@@ -33,10 +30,16 @@ const MeetingSession = db.sequelize.define("MeetingSession", {
 		type: DataTypes.INTEGER,
 		allowNull: false,
 		defaultValue: 0,
+		validate: {
+			max: 100,
+		}
 	},
 	recording_url: {
 		type: DataTypes.STRING,
 		allowNull: true,
+		validate: {
+			isUrl: true,
+		},
 	},
 },
 	{
@@ -44,9 +47,7 @@ const MeetingSession = db.sequelize.define("MeetingSession", {
 		timestamps: true,
 		createdAt: "created_at",
 		updatedAt: "updated_at",
-	});
+	}
+);
 
-MeetingSession.belongsTo(Meeting, { foreignKey: 'meeting_id', as: 'meeting' });
-MeetingSession.hasMany(UserConnection, { foreignKey: 'meeting_session_id', as: 'connections' });
-
-module.exports = MeetingSession;
+export default MeetingSession;
