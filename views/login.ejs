@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login Form</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+	<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+		<!-- Navigation Buttons -->
+		<div class="flex justify-center space-x-4 mb-6">
+			<button
+				disabled
+				class="bg-blue-500 text-white px-6 py-2 rounded-lg transition active:bg-blue-700 w-40"
+				data-form="login">
+				Login
+			</button>
+			<a href="/register">
+				<button class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition w-40"
+					data-form="register">
+					Register
+				</button>
+			</a>
+		</div>
+
+		<!-- Login Form -->
+		<h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+		<div class="space-y-4">
+			<div>
+				<label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+				<input type="email" id="login-email" name="email"
+					class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+					placeholder="you@example.com" required>
+			</div>
+			<div>
+				<label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+				<input type="password" id="login-password" name="password"
+					class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+					placeholder="Password" required>
+			</div>
+			<button id="loginButton" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
+				Login
+			</button>
+		</div>
+	</div>
+
+	<script>
+		document.getElementById('loginButton').addEventListener('click', (e) => {
+			e.preventDefault();
+			const email = document.getElementById('login-email').value;
+			const password = document.getElementById('login-password').value;
+
+			if (!email || !password) {
+				alert('Please fill in all fields.');
+				return;
+			}
+
+			console.log('Login attempt:', { email, password });
+			// Add your login logic here (e.g., API call to authenticate)
+		});
+	</script>
+</body>
+
+</html>
