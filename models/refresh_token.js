@@ -19,7 +19,7 @@ const RefreshToken = db.sequelize.define("RefreshToken", {
 		onUpdate: "CASCADE",
 	},
 	token: {
-		type: DataTypes.STRING,
+		type: DataTypes.TEXT,
 		allowNull: false,
 	},
 	expires_at: {

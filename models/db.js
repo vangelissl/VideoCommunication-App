@@ -63,46 +63,46 @@ const initDb = async () => {
 	await setAssociations();
 
 	// Create ENUM type for users.role before syncing
-	await sequelize.query(`
-		DO $$ 
-		BEGIN 
-		IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_users_role') THEN 
-			CREATE TYPE "enum_users_role" AS ENUM ('user', 'admin'); 
-		END IF; 
-		END $$;
-  	`);
+	// await sequelize.query(`
+	// 	DO $$ 
+	// 	BEGIN 
+	// 	IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_users_role') THEN 
+	// 		CREATE TYPE "enum_users_role" AS ENUM ('user', 'admin'); 
+	// 	END IF; 
+	// 	END $$;
+  	// `);
 
-	await sequelize.query(`
-		DO $$
-		BEGIN
-		IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_meeting_invitations_status') THEN
-			CREATE TYPE "enum_meeting_invitations_status" AS ENUM ('pending', 'accepted', 'declined');
-		END IF;
-		END $$;
-	`);
+	// await sequelize.query(`
+	// 	DO $$
+	// 	BEGIN
+	// 	IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_meeting_invitations_status') THEN
+	// 		CREATE TYPE "enum_meeting_invitations_status" AS ENUM ('pending', 'accepted', 'declined');
+	// 	END IF;
+	// 	END $$;
+	// `);
 
-	await sequelize.query(`
-		DO $$
-		BEGIN
-		IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_user_connections_status') THEN
-			CREATE TYPE "enum_user_connections_status" AS ENUM ('connected', 'disconnected');
-		END IF;
-		END $$;
-	`);
+	// await sequelize.query(`
+	// 	DO $$
+	// 	BEGIN
+	// 	IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_user_connections_status') THEN
+	// 		CREATE TYPE "enum_user_connections_status" AS ENUM ('connected', 'disconnected');
+	// 	END IF;
+	// 	END $$;
+	// `);
 
-	// Sync tables in dependency order
-	const modelsInOrder = [
-		'User', 'UserSettings', 'RefreshToken', 'PrivateChatRoom', 'PrivateChatRoomParticipant',
-		'PrivateChatMessage', 'Meeting', 'MeetingSettings', 'MeetingSession', 'MeetingParticipant',
-		'MeetingInvitation', 'PublicChatMessage', 'UserConnection'
-	];
+	// // Sync tables in dependency order
+	// const modelsInOrder = [
+	// 	'User', 'UserSettings', 'RefreshToken', 'PrivateChatRoom', 'PrivateChatRoomParticipant',
+	// 	'PrivateChatMessage', 'Meeting', 'MeetingSettings', 'MeetingSession', 'MeetingParticipant',
+	// 	'MeetingInvitation', 'PublicChatMessage', 'UserConnection'
+	// ];
 
-	for (const modelName of modelsInOrder) {
-		if (db[modelName]) {
-			await db[modelName].sync({ alter: process.env.NODE_ENV === 'development' });
-			console.log(`${modelName} synced`);
-		}
-	}
+	// for (const modelName of modelsInOrder) {
+	// 	if (db[modelName]) {
+	// 		await db[modelName].sync({ force: process.env.NODE_ENV === 'development' });
+	// 		console.log(`${modelName} synced`);
+	// 	}
+	// }
 
 	return db;
 };

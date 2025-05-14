@@ -10,6 +10,8 @@ import indexRouter from './routes/index.js';
 import usersRouter from './routes/users.js';
 import db from './models/db.js'
 
+import { authenticateToken } from './middleware/jwt.js';
+
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -36,8 +38,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Public part of the App
 app.use('/', indexRouter);
+
+// Protected part of the App
+app.use(authenticateToken);
 app.use('/users', usersRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

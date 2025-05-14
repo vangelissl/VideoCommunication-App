@@ -1,54 +1,18 @@
-import express from 'express'
-var router = express.Router();
+import express from 'express';
+import * as userController from '../controllers/userController.js';
+const router = express.Router();
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
 	res.render('index', { title: 'Express' });
 });
 
-router.get('/login', (req, res, next) => {
-	res.render('login', {
-		title: 'Log in',
-		email: null,
-		password: null,
-		errors: null,
-	});
-});
+router.get('/login', userController.login_user_get);
 
-router.post('/login', (req, res, next) => {
-	const email = req.body.email;
-	const password = req.body.password;
+router.post('/login', userController.login_user_post);
 
-	console.log(email);
-	console.log(password);
+router.get('/register', userController.register_user_get);
 
-	res.render('login', {
-		title: 'Login',
-		email: null,
-		password: password,
-		errors: null,
-	});
-})
-
-router.get('/register', (req, res, next) => {
-	res.render('register', {
-		title: 'Register',
-		errors: null
-	});
-});
-
-router.post('/register', (req, res, next) => {
-	console.log(req.body.username);
-	console.log(req.body.email);
-	console.log(req.body.firstName);
-	console.log(req.body.lastName);
-	console.log(req.body.password);
-	console.log(req.body.confirmPassword);
-
-	res.render('register', {
-		title: "Register",
-		errors: null,
-	});
-});
+router.post('/register', userController.register_user_post);
 
 export default router;

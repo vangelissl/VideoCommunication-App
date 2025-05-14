@@ -1,6 +1,6 @@
 'use strict';
 
-import { hashPassword } from "../services/password_encryption.js"
+import { hashPassword } from "../services/securityService.js"
 
 import { DataTypes } from 'sequelize'
 import db from './db.js'
@@ -33,9 +33,6 @@ const User = db.sequelize.define('User', {
 	password_hash: {
 		type: DataTypes.STRING,
 		allowNull: false,
-		validate: {
-			is: /^[0-9a-f]{50,}$/i
-		},
 	},
 	first_name: {
 		type: DataTypes.STRING,
