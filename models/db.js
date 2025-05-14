@@ -99,7 +99,7 @@ const initDb = async () => {
 
 	for (const modelName of modelsInOrder) {
 		if (db[modelName]) {
-			await db[modelName].sync({ force: process.env.NODE_ENV === 'development' });
+			await db[modelName].sync({ alter: process.env.NODE_ENV === 'development' });
 			console.log(`${modelName} synced`);
 		}
 	}

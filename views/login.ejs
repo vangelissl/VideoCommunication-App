@@ -12,9 +12,7 @@
 	<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
 		<!-- Navigation Buttons -->
 		<div class="flex justify-center space-x-4 mb-6">
-			<button
-				disabled
-				class="bg-blue-500 text-white px-6 py-2 rounded-lg transition active:bg-blue-700 w-40"
+			<button disabled class="bg-blue-500 text-white px-6 py-2 rounded-lg transition active:bg-blue-700 w-40"
 				data-form="login">
 				Login
 			</button>
@@ -27,41 +25,38 @@
 		</div>
 
 		<!-- Login Form -->
-		<h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
-		<div class="space-y-4">
-			<div>
-				<label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
-				<input type="email" id="login-email" name="email"
-					class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-					placeholder="you@example.com" required>
+		<form action="/login" method="post">
+			<h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+			<div class="space-y-4">
+				<div>
+					<label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+					<input type="email" id="login-email" name="email"
+						class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+						placeholder="you@example.com" required value="<%= (email === null) ? "" : email%>">
+				</div>
+				<div>
+					<label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+					<input type="password" id="login-password" name="password"
+						class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+						placeholder="Password" required value="<%= (password === null) ? "" : password%>">>
+				</div>
+				<div class="d-flex justify-content-center error-container">
+					<% if (errors) { %>
+						<% for (const error of errors) { %>
+							<p class="" style="color: rgb(238, 14, 14);">
+								<%=error%>
+							</p>
+						<% } %>
+					<% } %>
+				</div>
+				<button id="loginButton" type="sublmit"
+					class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
+					Login
+				</button>
 			</div>
-			<div>
-				<label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
-				<input type="password" id="login-password" name="password"
-					class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-					placeholder="Password" required>
-			</div>
-			<button id="loginButton" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
-				Login
-			</button>
-		</div>
+		</form>
+
 	</div>
-
-	<script>
-		document.getElementById('loginButton').addEventListener('click', (e) => {
-			e.preventDefault();
-			const email = document.getElementById('login-email').value;
-			const password = document.getElementById('login-password').value;
-
-			if (!email || !password) {
-				alert('Please fill in all fields.');
-				return;
-			}
-
-			console.log('Login attempt:', { email, password });
-			// Add your login logic here (e.g., API call to authenticate)
-		});
-	</script>
 </body>
 
 </html>
