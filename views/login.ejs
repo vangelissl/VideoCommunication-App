@@ -6,19 +6,30 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Login Form</title>
 	<script src="https://cdn.tailwindcss.com"></script>
+
+	<style>
+		.custom-blue {
+			background-color: #4B79A1;
+			transition-duration: 0.5s;
+		}
+
+		.custom-blue-hover:hover {
+			background-color: #283E51
+		}
+	</style>
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 	<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
 		<!-- Navigation Buttons -->
 		<div class="flex justify-center space-x-4 mb-6">
-			<button disabled class="bg-blue-500 text-white px-6 py-2 rounded-lg transition active:bg-blue-700 w-40"
-				data-form="login">
+			<button disabled class="custom-blue text-white py-2 w-40"
+				style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;" data-form="login">
 				Login
 			</button>
-			<a href="/register">
-				<button class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition w-40"
-					data-form="register">
+			<a href="/register" style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;">
+				<button class="bg-gray-300 text-gray-700 py-2 hover:bg-gray-400 transition w-40"
+					style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;" data-form="register">
 					Register
 				</button>
 			</a>
@@ -49,8 +60,7 @@
 							<% }) %>
 								<% } %>
 				</div>
-				<button id="loginButton" type="sublmit"
-					class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
+				<button id="loginButton" type="submit" class="w-full text-white py-2 rounded custom-blue custom-blue-hover">
 					Login
 				</button>
 			</div>

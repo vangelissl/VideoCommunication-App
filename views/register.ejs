@@ -6,6 +6,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Register Form</title>
 	<script src="https://cdn.tailwindcss.com"></script>
+
+	<style>
+		.custom-blue {
+			background-color: #4B79A1;
+			transition-duration: 0.5s;
+		}
+
+		.custom-blue-hover:hover {
+			background-color: #283E51
+		}
+	</style>
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
@@ -14,12 +25,12 @@
 		<!-- Navigation Buttons -->
 		<div class="flex justify-center space-x-4 mb-6">
 			<a href="/login" style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;">
-				<button class="bg-gray-300 text-gray-700  py-2 hover:bg-gray-400 transition w-40"
+				<button class="bg-gray-300 text-gray-700 py-2 hover:bg-gray-400 transition w-40"
 					style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;" data-form="login">
 					Login
 				</button>
 			</a>
-			<button disabled class="bg-blue-500 text-white py-2 w-40"
+			<button disabled class="text-white py-2 w-40 custom-blue"
 				style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;" data-form="register">
 				Register
 			</button>
@@ -75,7 +86,7 @@
 								<% } %>
 				</div>
 				<button id="registerButton" type="submit"
-					class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
+					class="w-full text-white py-2 rounded custom-blue custom-blue-hover">
 					Register
 				</button>
 			</div>
