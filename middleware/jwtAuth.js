@@ -2,7 +2,13 @@ import jwt from 'jsonwebtoken';
 import process from 'process';
 import { generateAccessToken, saveAccessTokenAsCookie } from '../services/authTokenService.js';
 
-
+/**
+ * Middleware function that checks jwt access token of current user and decides whether the user has permission or no
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
 export const authenticateToken = (req, res, next) => {
 	const accessToken = req.cookies.accessToken;
 
@@ -20,6 +26,20 @@ export const authenticateToken = (req, res, next) => {
 		req.user = user;
 		next();
 	});
+};
+
+/**
+ * Creates 
+ * @param {*} role 
+ * @returns 
+ */
+export const requireRole = (role) => {
+	return (req, res, next) => {
+		if (req.user.role !== role) {
+			return res.status(403).json({ message: "Forbidden" });
+		}
+		next();
+	};
 };
 
 export const refreshAccessToken = async (req, res, next) => {

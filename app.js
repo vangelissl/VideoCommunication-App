@@ -8,6 +8,7 @@ import logger from 'morgan';
 
 import indexRouter from './routes/index.js';
 import usersRouter from './routes/users.js';
+import authRouter from './routes/auth.js';
 import db from './models/db.js'
 
 import { authenticateToken, requireRole } from './middleware/jwtAuth.js';
@@ -38,14 +39,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Public part of the App
+// Public routes (no authentication required)
 app.use('/', indexRouter);
+app.use('/auth', authRouter);
 
-// Protected part of the App
+// Authentication middleware (all routes below that require authentication)
 app.use(authenticateToken);
 app.use(requireRole);
-app.use('/users', usersRouter);
 
+// Protected routes (authentication required)
+app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
