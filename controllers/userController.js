@@ -74,7 +74,7 @@ export const register_user_post = [
 				await createUserSettings(registeredUser.id);
 
 				// Redirect to login page or home page after successful registration
-				res.redirect('/login');
+				res.redirect('/auth/login');
 			} catch (error) {
 				next(error)
 			}
@@ -84,7 +84,7 @@ export const register_user_post = [
 export const login_user_get = asyncHandler(async (req, res, next) => {
 	// If user is authenticated redirect them to home page
 	if (req.user) {
-		res.redirect('/');
+		res.redirect('/auth/login');
 		return;
 	}
 
@@ -145,7 +145,7 @@ export const login_user_post = [
 export const logout = async (req, res) => {
 	// If user is not authenticated, redirect to login
 	if (!req.user) {
-		res.redirect('/login');
+		res.redirect('/auth/login');
 		return;
 	}
 
@@ -158,5 +158,5 @@ export const logout = async (req, res) => {
 		await revokeRefreshToken(req.user.id);
 	}
 
-	res.redirect('/login?success=Logged+out+successfully');
+	res.redirect('/auth/login?success=Logged+out+successfully');
 };

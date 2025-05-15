@@ -43,11 +43,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 
-// Authentication middleware (all routes below that require authentication)
-app.use(authenticateToken);
-app.use(requireRole);
+// Authentication middleware (used for specific 'protected' routes)
+usersRouter.use(authenticateToken);
+usersRouter.use(requireRole);
 
-// Protected routes (authentication required)
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
