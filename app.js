@@ -11,7 +11,7 @@ import usersRouter from './routes/users.js';
 import authRouter from './routes/auth.js';
 import db from './models/db.js'
 
-import { authenticateToken, requireRole } from './middleware/jwtAuth.js';
+import { authenticateToken, requireRole, redirectIfLoggedIn, getUserIfAuth } from './middleware/jwtAuth.js';
 
 
 const app = express();
@@ -42,6 +42,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Public routes (no authentication required)
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
+
+// Authentication check middleware (redirect use to forbid loggin or registering before logging out)
+authRouter.use(redirectIfLoggedIn);
+indexRouter.use(getUserIfAuth);
 
 // Authentication middleware (used for specific 'protected' routes)
 usersRouter.use(authenticateToken);

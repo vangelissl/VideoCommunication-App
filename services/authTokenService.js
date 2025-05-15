@@ -57,7 +57,6 @@ export const saveRefreshTokenAsCookie = (token, res) => {
 	});
 }
 
-
 export const findRefreshToken = async (token) => {
 	return await db.RefreshToken.findOne({
 		where: {

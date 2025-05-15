@@ -2,16 +2,11 @@ import asyncHandler from 'express-async-handler';
 import { emailDoesExist, findUserByEmail, usernameDoesExist, registerNewUser, passwordIsValid } from '../services/authService.js';
 import { body, validationResult } from 'express-validator';
 import { createUserSettings } from '../services/settingsService.js';
-import { generateAccessToken, generateRefreshToken, saveAccessTokenAsCookie, saveRefreshTokenAsCookie } from '../services/authTokenService.js';
+import { generateAccessToken, generateRefreshToken, saveAccessTokenAsCookie, saveRefreshTokenAsCookie, revokeRefreshToken } from '../services/authTokenService.js';
+
 
 
 export const register_user_get = asyncHandler(async (req, res, next) => {
-	// If user is authenticated redirect them to home page
-	if (req.user) {
-		res.redirect('/');
-		return;
-	}
-
 	// Let them go to register page
 	res.render('register', {
 		title: 'Register',
@@ -82,11 +77,6 @@ export const register_user_post = [
 	})];
 
 export const login_user_get = asyncHandler(async (req, res, next) => {
-	// If user is authenticated redirect them to home page
-	if (req.user) {
-		res.redirect('/auth/login');
-		return;
-	}
 
 	res.render('login', {
 		title: 'Login',
@@ -143,11 +133,10 @@ export const login_user_post = [
 ];
 
 export const logout = async (req, res) => {
-	// If user is not authenticated, redirect to login
 	if (!req.user) {
-		res.redirect('/auth/login');
+		res.status(404).render('404');
 		return;
-	}
+	} 
 
 	// Clear cookies
 	res.clearCookie('accessToken');
@@ -157,6 +146,6 @@ export const logout = async (req, res) => {
 	if (req.user && req.user.id) {
 		await revokeRefreshToken(req.user.id);
 	}
-
-	res.redirect('/auth/login?success=Logged+out+successfully');
+	
+	res.redirect('/');
 };

@@ -1,14 +1,21 @@
 import express from 'express';
 import * as userController from '../controllers/userController.js';
+import { redirectIfLoggedIn, getUserIfAuth } from '../middleware/jwtAuth.js';
 const router = express.Router();
 
-router.get('/login', userController.login_user_get);
+/* GET register page. */
+router.get('/login', redirectIfLoggedIn, userController.login_user_get);
 
-router.post('/login', userController.login_user_post);
+/* POST user register info from register page. */
+router.post('/login', redirectIfLoggedIn, userController.login_user_post);
 
-router.get('/register', userController.register_user_get);
+/* GET login page. */
+router.get('/register', redirectIfLoggedIn, userController.register_user_get);
 
-router.post('/register', userController.register_user_post);
+/* POST user login data from login page. */
+router.post('/register', redirectIfLoggedIn, userController.register_user_post);
 
+/* GET for logout. */
+router.get('/logout', getUserIfAuth, userController.logout);
 
 export default router;
