@@ -10,7 +10,7 @@ import indexRouter from './routes/index.js';
 import usersRouter from './routes/users.js';
 import db from './models/db.js'
 
-import { authenticateToken } from './middleware/jwt.js';
+import { authenticateToken, requireRole } from './middleware/jwtAuth.js';
 
 
 const app = express();
@@ -43,6 +43,7 @@ app.use('/', indexRouter);
 
 // Protected part of the App
 app.use(authenticateToken);
+app.use(requireRole);
 app.use('/users', usersRouter);
 
 

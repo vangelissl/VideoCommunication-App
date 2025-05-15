@@ -2,12 +2,12 @@ import jwt from 'jsonwebtoken';
 import process from 'process';
 import db from '../models/db.js';
 
-export const generateRefreshToken = async (id, email, username) => {
+export const generateRefreshToken = async (id, email, role) => {
 	// Generate refresh token for user
 	const refreshToken = jwt.sign({
 		id: id,
 		email: email,
-		username: username,
+		role: role,
 	},
 		process.env.REFRESH_TOKEN_SECRET, {
 		expiresIn: '10d',
@@ -27,12 +27,12 @@ export const generateRefreshToken = async (id, email, username) => {
 	});
 };
 
-export const generateAccessToken = (id, email, username) => {
+export const generateAccessToken = (id, email, role) => {
 	return jwt.sign(
 		{
 			id: id,
 			email: email,
-			username: username,
+			role: role,
 		},
 		process.env.ACCESS_TOKEN_SECRET,
 		{ expiresIn: '1h' }
@@ -53,11 +53,9 @@ export const saveRefreshTokenAsCookie = (token, res) => {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
 		sameSite: 'strict',
-		maxAge: 3600000, // 1 hour
+		maxAge: 3600000 * 24 * 10, // 10 days
 	});
 }
-
-
 
 
 export const findRefreshToken = async (token) => {

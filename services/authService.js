@@ -11,18 +11,37 @@ export async function registerNewUser(username, firstName, lastName, email, plai
 	});
 }
 
-export const emailDoesExist = async (email, flag = true) => {
-	// Check if email is unique
-	let existingUser = await findUserByEmail(email);
-
-	return (existingUser !== null) === flag;
+export const emailDoesExist = async (email, shouldExist = true) => {
+  // Check if email exists in database
+  const existingUser = await findUserByEmail(email);
+  const doesExist = existingUser !== null;
+  
+  if (shouldExist === doesExist) {
+    return true; // Validation passes
+  } else {
+    // This makes the validation fail with a custom error
+    return Promise.reject(
+      shouldExist 
+        ? 'Email address not found' 
+        : 'Email address already in use'
+    );
+  }
 };
 
-export const usernameDoesExist = async (username, flag = true) => {
-	// Check if username is unique
-	let existingUser = await findUserByUsername(username);
-
-	return (existingUser !== null) === flag;
+export const usernameDoesExist = async (username, shouldExist = true) => {
+  // Check if username exists in database
+  const existingUser = await findUserByUsername(username);
+  const doesExist = existingUser !== null;
+  
+  if (shouldExist === doesExist) {
+    return true; // Validation passes
+  } else {
+    return Promise.reject(
+      shouldExist 
+        ? 'Username not found' 
+        : 'Username already in use'
+    );
+  }
 };
 
 export async function passwordIsValid(password, hashedPassword) {

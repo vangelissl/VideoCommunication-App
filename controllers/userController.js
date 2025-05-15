@@ -17,8 +17,7 @@ export const register_user_post = [
 	body("username")
 		.isAlphanumeric()
 		.withMessage("Username has non-alphanumeric characters.")
-		.custom(value => usernameDoesExist(value, false))
-		.withMessage('User with this username already exists'),
+		.custom(async value => await usernameDoesExist(value, false)),
 	body('firstName')
 		.trim()
 		.notEmpty().withMessage('First name is required')
@@ -36,8 +35,7 @@ export const register_user_post = [
 		.notEmpty().withMessage('Email is required')
 		.isEmail().withMessage('Invalid email address')
 		.normalizeEmail()
-		.custom(value => emailDoesExist(value, false))
-		.withMessage('User with this email already exists'),
+		.custom(async value => await emailDoesExist(value, false)),
 	body('password')
 		.notEmpty().withMessage('Password is required')
 		.isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
@@ -90,8 +88,7 @@ export const login_user_post = [
 		.notEmpty().withMessage('Email is required')
 		.isEmail().withMessage('Invalid email address')
 		.normalizeEmail()
-		.custom(async value => emailDoesExist(value))
-		.withMessage('User with this email doesn\'t exist'),
+		.custom(async value => await emailDoesExist(value)),
 	body('password')
 		.notEmpty().withMessage('Password is required')
 		.custom(async (value, { req }) => {
@@ -118,10 +115,10 @@ export const login_user_post = [
 			const user = await findUserByEmail(req.body.email);
 
 			// Generate refresh token and save it to db
-			const refreshToken = await generateRefreshToken(user.id, user.email, user.username);
+			const refreshToken = await generateRefreshToken(user.id, user.email, user.role);
 
 			// Generate access token 
-			const accessToken = generateAccessToken(user.id, user.email, user.username);
+			const accessToken = generateAccessToken(user.id, user.email, user.role);
 
 			// Store both tokens in httpOnly cookies
 			saveAccessTokenAsCookie(accessToken, res);
