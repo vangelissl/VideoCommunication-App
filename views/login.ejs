@@ -27,7 +27,7 @@
 				style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;" data-form="login">
 				Login
 			</button>
-			<a href="/register" style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;">
+			<a href="/auth/register" style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;">
 				<button class="bg-gray-300 text-gray-700 py-2 hover:bg-gray-400 transition w-40"
 					style="margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;" data-form="register">
 					Register
@@ -49,7 +49,7 @@
 					<label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
 					<input type="password" id="login-password" name="password"
 						class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-						placeholder="Password" required value="<%= (user === null) ? "" : user.password%>">>
+						placeholder="Password" required value="<%= (user === null) ? "" : user.password%>">
 				</div>
 				<div class="d-flex justify-content-center error-container">
 					<% if (errors) { %>
@@ -60,9 +60,13 @@
 							<% }) %>
 								<% } %>
 				</div>
-				<button id="loginButton" type="submit" class="w-full text-white py-2 rounded custom-blue custom-blue-hover">
+				<button id="loginButton" type="submit"
+					class="w-full text-white py-2 rounded custom-blue custom-blue-hover">
 					Login
 				</button>
+				<div class="flex justify-center">
+					<a href="/" class="text-black-600 hover:underline">&larr; Back to Home</a>
+				</div>
 			</div>
 		</form>
 

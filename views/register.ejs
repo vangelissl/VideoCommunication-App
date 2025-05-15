@@ -81,14 +81,18 @@
 				<div class="d-flex justify-content-center error-container">
 					<% if (errors) { %>
 						<p style="color: red;">
-								<%= errors[errors.length-1].msg %>
-							</p>
-								<% } %>
+							<%= errors[errors.length-1].msg %>
+						</p>
+						<% } %>
 				</div>
 				<button id="registerButton" type="submit"
 					class="w-full text-white py-2 rounded custom-blue custom-blue-hover">
 					Register
 				</button>
+				<div class="flex justify-center">
+					<a href="/" class="text-black-600 hover:underline">&larr; Back to Home</a>
+				</div>
+
 			</div>
 		</form>
 
