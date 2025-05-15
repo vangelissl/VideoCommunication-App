@@ -6,6 +6,13 @@ import { generateAccessToken, generateRefreshToken, saveAccessTokenAsCookie, sav
 
 
 export const register_user_get = asyncHandler(async (req, res, next) => {
+	// If user is authenticated redirect them to home page
+	if (req.user) {
+		res.redirect('/');
+		return;
+	}
+
+	// Let them go to register page
 	res.render('register', {
 		title: 'Register',
 		user: null,
@@ -75,6 +82,12 @@ export const register_user_post = [
 	})];
 
 export const login_user_get = asyncHandler(async (req, res, next) => {
+	// If user is authenticated redirect them to home page
+	if (req.user) {
+		res.redirect('/');
+		return;
+	}
+
 	res.render('login', {
 		title: 'Login',
 		user: null,
@@ -130,6 +143,12 @@ export const login_user_post = [
 ];
 
 export const logout = async (req, res) => {
+	// If user is not authenticated, redirect to login
+	if (!req.user) {
+		res.redirect('/login');
+		return;
+	}
+
 	// Clear cookies
 	res.clearCookie('accessToken');
 	res.clearCookie('refreshToken');
