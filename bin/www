@@ -7,6 +7,7 @@
 import app from '../app.js'
 import createDebug from 'debug'
 import http from 'http'
+import { Server } from 'socket.io';
 
 const debug = createDebug('videocomapp:server');
 
@@ -22,6 +23,12 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+const io = new Server(server);
+
+io.on('connection', (socket) => {
+  
+});
 
 /**
  * Listen on provided port, on all network interfaces.
