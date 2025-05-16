@@ -14,11 +14,31 @@
 			</ul>
 			<div class="d-flex">
 				<% if (user) { %>
-					<a href="/auth/logout" class="btn btn-primary">Log out</a>
-				<% } else { %>
-					<a href="/auth/login" class="btn btn-outline custom-blue me-2">Log in</a>
-					<a href="/auth/register" class="btn btn-primary">Register</a>
-				<% } %>
+					<div class="d-flex align-items-center">
+						<div class="dropdown">
+							<button
+								class="btn btn-link text-dark dropdown-toggle d-flex align-items-center text-decoration-none"
+								type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+								<span><%= user.fullname %></span>
+							</button>
+							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+								<li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>Profile</a>
+								</li>
+								<li><a class="dropdown-item" href="/#"><i
+											class="fas fa-cog me-2"></i>Settings</a>
+								</li>
+								<li>
+									<hr class="dropdown-divider">
+								</li>
+								<li><a class="dropdown-item" href="/auth/logout"><i
+											class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+							</ul>
+						</div>
+					</div>
+					<% } else { %>
+						<a href="/auth/login" class="btn btn-outline custom-blue me-2">Log in</a>
+						<a href="/auth/register" class="btn btn-primary">Register</a>
+						<% } %>
 			</div>
 		</div>
 	</div>

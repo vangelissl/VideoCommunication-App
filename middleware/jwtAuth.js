@@ -60,7 +60,7 @@ export const refreshAccessToken = async (req, res, next) => {
 		}
 
 		// Create a new access token
-		const accessToken = generateAccessToken(user.id, user.email, user.username);
+		const accessToken = generateAccessToken(user.id, user.email, user.username, user.fullname);
 
 		// Set the new access token in the cookie
 		saveAccessTokenAsCookie(accessToken, res);
@@ -136,11 +136,7 @@ export const getUserIfAuth = (req, res, next) => {
 		// Try to verify the access token
 		const user = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
 		// If token is valid, set isLoggedIn to true and add user data to locals
-		req.user = {
-			id: user.id,
-			email: user.email,
-			role: user.role
-		};
+		req.user = user;
 		return next();
 	} catch (err) {
 		// If token is expired, try the refresh token
@@ -152,7 +148,7 @@ export const getUserIfAuth = (req, res, next) => {
 					const user = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
 					// If refresh token is valid, they're still logged in, create a new access token
-					const accessToken = generateAccessToken(user.id, user.email, user.username);
+					const accessToken = generateAccessToken(user.id, user.email, user.username, user.fullname);
 
 					// Set the new access token in the cookie
 					saveAccessTokenAsCookie(accessToken, res);

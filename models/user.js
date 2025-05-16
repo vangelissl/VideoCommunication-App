@@ -47,6 +47,12 @@ const User = db.sequelize.define('User', {
 		allowNull: false,
 		defaultValue: true,
 	},
+	fullname: {
+		type: DataTypes.VIRTUAL,
+		get() {
+			return `${this.first_name} ${this.last_name}`;
+		},
+	}
 },
 	{
 		hooks: {

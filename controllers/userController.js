@@ -118,10 +118,10 @@ export const login_user_post = [
 			const user = await findUserByEmail(req.body.email);
 
 			// Generate refresh token and save it to db
-			const refreshToken = await generateRefreshToken(user.id, user.email, user.role);
+			const refreshToken = await generateRefreshToken(user.id, user.email, user.role, user.fullname);
 
 			// Generate access token 
-			const accessToken = generateAccessToken(user.id, user.email, user.role);
+			const accessToken = generateAccessToken(user.id, user.email, user.role, user.fullname);
 
 			// Store both tokens in httpOnly cookies
 			saveAccessTokenAsCookie(accessToken, res);

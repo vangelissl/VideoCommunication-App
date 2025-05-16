@@ -2,12 +2,13 @@ import jwt from 'jsonwebtoken';
 import process from 'process';
 import db from '../models/db.js';
 
-export const generateRefreshToken = async (id, email, role) => {
+export const generateRefreshToken = async (id, email, role, fullname) => {
 	// Generate refresh token for user
 	const refreshToken = jwt.sign({
 		id: id,
 		email: email,
 		role: role,
+		fullname: fullname,
 	},
 		process.env.REFRESH_TOKEN_SECRET, {
 		expiresIn: '10d',
@@ -27,12 +28,13 @@ export const generateRefreshToken = async (id, email, role) => {
 	});
 };
 
-export const generateAccessToken = (id, email, role) => {
+export const generateAccessToken = (id, email, role, fullname) => {
 	return jwt.sign(
 		{
 			id: id,
 			email: email,
 			role: role,
+			fullname: fullname,
 		},
 		process.env.ACCESS_TOKEN_SECRET,
 		{ expiresIn: '1h' }

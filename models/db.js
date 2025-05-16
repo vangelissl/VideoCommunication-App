@@ -62,7 +62,7 @@ const initDb = async () => {
 	// Set custom associations after models are loaded
 	await setAssociations();
 
-	// Create ENUM type for users.role before syncing
+	// // Create ENUM type for users.role before syncing
 	// await sequelize.query(`
 	// 	DO $$ 
 	// 	BEGIN 
