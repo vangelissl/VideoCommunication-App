@@ -68,6 +68,15 @@ const Meeting = db.sequelize.define("Meeting", {
 		allowNull: false,
 		defaultValue: true,
 	},
+	duration: {
+		type: DataTypes.VIRTUAL,
+		get() {
+			if (this.actual_end_time) {
+				return this.actual_end_time - this.start_time;
+			}
+			return null;
+		}
+	}
 },
 	{
 		tableName: "meetings",

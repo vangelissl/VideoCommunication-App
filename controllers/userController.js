@@ -136,7 +136,7 @@ export const logout = async (req, res) => {
 	if (!req.user) {
 		res.status(404).render('404');
 		return;
-	} 
+	}
 
 	// Clear cookies
 	res.clearCookie('accessToken');
@@ -146,6 +146,31 @@ export const logout = async (req, res) => {
 	if (req.user && req.user.id) {
 		await revokeRefreshToken(req.user.id);
 	}
-	
+
 	res.redirect('/');
 };
+
+export const profile_get = async (req, res, next) => {
+	try {
+		const user = await findUserByEmail(req.user.email);
+		if (!user) return res.status(404).json({ message: "User not found" });
+
+		const meetingParticipations = await user.getMeetingParticipations();
+
+		// Collect meetings
+		const meetings = [];
+		for (const participation of meetingParticipations) {
+			const meeting = await participation.getMeeting(); // get meeting
+			meeting.participants_num = await meeting.getParticipants().length;
+			meetings.push(meeting); 
+		}
+
+		res.render('profile', {
+			title: 'Profile',
+			user: req.user,
+			meetings: meetings,
+		});
+	} catch (error) {
+		next(error); 
+	}
+}
