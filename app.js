@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 
 import indexRouter from './routes/index.js';
-import usersRouter from './routes/users.js';
+import usersRouter from './routes/api/users.js';
 import authRouter from './routes/auth.js';
 import profileRouter from './routes/profile.js';
 import roomPagesRouter from './routes/room.js';

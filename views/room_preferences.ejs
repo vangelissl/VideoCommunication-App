@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Meeting | Specto</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Flatpickr for datetime picker -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    .page-header {
+      background: linear-gradient(135deg, #4B79A1, #283E51);
+      color: white;
+      padding: 2rem 0;
+      border-radius: 0 0 20px 20px;
+      margin-bottom: 2rem;
+    }
+
+    .form-card {
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .settings-section {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .settings-section:last-child {
+      border-bottom: none;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked+.toggle-slider {
+      background-color: #4B79A1;
+    }
+
+    input:focus+.toggle-slider {
+      box-shadow: 0 0 1px #4B79A1;
+    }
+
+    input:checked+.toggle-slider:before {
+      transform: translateX(26px);
+    }
+
+    .form-label {
+      font-weight: 500;
+    }
+
+    .form-text {
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+
+    .btn-primary {
+      background-color: #4B79A1;
+      border-color: #4B79A1;
+    }
+
+    .btn-primary:hover {
+      background-color: #3d6484;
+      border-color: #3d6484;
+    }
+
+    .btn-outline-primary {
+      color: #4B79A1;
+      border-color: #4B79A1;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #4B79A1;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation Bar -->
+  <%- include('partials/navbar') %>
+
+    <!-- Page Header -->
+    <section class="page-header">
+      <div class="container">
+        <h1><i class="fas fa-video me-2"></i>Create Meeting</h1>
+        <p class="lead">Set up a new meeting with your preferred settings</p>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container mb-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="card form-card">
+            <div class="card-body p-4">
+              <form id="create-meeting-form" action="/meetings/create" method="POST">
+
+                <!-- Basic Information Section -->
+                <div class="settings-section">
+                  <h4 class="mb-3">Basic Information</h4>
+
+                  <div class="mb-3">
+                    <label for="title" class="form-label">Meeting Title*</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    <div class="form-text">Briefly describe the purpose of this meeting</div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="max_participants" class="form-label">Maximum Participants</label>
+                    <input type="number" class="form-control" id="max_participants" name="max_participants" min="2"
+                      value="10">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="meeting_password" class="form-label">Meeting Password</label>
+                    <input type="text" class="form-control" id="meeting_password" name="meeting_password">
+                    <div class="form-text">Leave blank for no password</div>
+                  </div>
+                </div>
+
+                <!-- Schedule Section -->
+                <div class="settings-section">
+                  <h4 class="mb-3">Schedule</h4>
+
+                  <div class="mb-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="timing_option" id="start_now" value="now"
+                        checked>
+                      <label class="form-check-label" for="start_now">
+                        Start meeting now
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="timing_option" id="schedule_later"
+                        value="schedule">
+                      <label class="form-check-label" for="schedule_later">
+                        Schedule for later
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="duration" class="form-label">Duration (minutes)*</label>
+                    <input type="number" class="form-control" id="duration" name="duration" min="15" step="5" value="60"
+                      required>
+                    <div class="form-text">Expected duration of your meeting</div>
+                  </div>
+
+                  <div id="schedule-options" class="d-none">
+                    <div class="mb-3">
+                      <label for="start_time" class="form-label">Start Date & Time*</label>
+                      <input type="text" class="form-control" id="start_time" name="start_time" required>
+                    </div>
+
+                    <div class="mb-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="is_recurring" name="is_recurring">
+                        <label class="form-check-label" for="is_recurring">
+                          Recurring meeting
+                        </label>
+                      </div>
+                    </div>
+
+                    <div id="recurrence-options" class="mb-3 d-none">
+                      <label for="recurrence_pattern" class="form-label">Recurrence Pattern</label>
+                      <select class="form-select" id="recurrence_pattern" name="recurrence_pattern">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-weekly</option>
+                        <option value="monthly">Monthly</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Meeting Settings Section -->
+                <div class="settings-section">
+                  <h4 class="mb-3">Meeting Settings</h4>
+
+                  <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <label class="form-label mb-0">Waiting Room</label>
+                      <div class="form-text">Participants will wait until you admit them</div>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="waiting_room_enabled" name="waiting_room_enabled" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <label class="form-label mb-0">Recording</label>
+                      <div class="form-text">Automatically record the meeting</div>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="recording_enabled" name="recording_enabled">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <label class="form-label mb-0">Chat</label>
+                      <div class="form-text">Allow participants to use chat</div>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="chat_enabled" name="chat_enabled" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <label class="form-label mb-0">Screen Sharing</label>
+                      <div class="form-text">Allow participants to share their screen</div>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="screen_sharing_enabled" name="screen_sharing_enabled" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <label class="form-label mb-0">Mute Participants on Entry</label>
+                      <div class="form-text">Participants join with microphone muted</div>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="participant_audio_default" name="participant_audio_default">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                      <label class="form-label mb-0">Turn Off Video on Entry</label>
+                      <div class="form-text">Participants join with video turned off</div>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="participant_video_default" name="participant_video_default">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="button" class="btn btn-outline-primary me-md-2"
+                    onclick="window.location.href='/profile';">Cancel</button>
+                  <button type="submit" id="submit-button" class="btn btn-primary">Start Meeting Now</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Flatpickr for datetime picker -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Initialize datetime picker
+        flatpickr("#start_time", {
+          enableTime: true,
+          dateFormat: "Y-m-d H:i",
+          minDate: "today",
+          defaultDate: new Date().setHours(new Date().getHours() + 1),
+          time_24hr: true
+        });
+
+        // Get references to form elements
+        const form = document.getElementById('create-meeting-form');
+        const timingOptions = document.querySelectorAll('input[name="timing_option"]');
+        const scheduleOptions = document.getElementById('schedule-options');
+        const submitButton = document.getElementById('submit-button');
+        const startTimeInput = document.getElementById('start_time');
+        const startNowRadio = document.getElementById('start_now');
+        const scheduleLaterRadio = document.getElementById('schedule_later');
+
+        // Update UI based on selected timing option
+        function updateTimingOptions() {
+          const isScheduled = scheduleLaterRadio.checked;
+
+          if (isScheduled) {
+            scheduleOptions.classList.remove('d-none');
+            submitButton.textContent = 'Schedule Meeting';
+            // Don't set required here - we'll validate manually
+          } else {
+            scheduleOptions.classList.add('d-none');
+            submitButton.textContent = 'Start Meeting Now';
+            // Don't remove required here - we'll validate manually
+          }
+        }
+
+        // Initial call to set the correct state
+        updateTimingOptions();
+
+        // Add event listeners to radio buttons
+        timingOptions.forEach(option => {
+          option.addEventListener('change', updateTimingOptions);
+        });
+
+        // Toggle recurrence options
+        const isRecurring = document.getElementById('is_recurring');
+        const recurrenceOptions = document.getElementById('recurrence-options');
+
+        isRecurring.addEventListener('change', function () {
+          if (this.checked) {
+            recurrenceOptions.classList.remove('d-none');
+          } else {
+            recurrenceOptions.classList.add('d-none');
+          }
+        });
+
+        // Custom form validation
+        form.addEventListener('submit', function (event) {
+          // If "Schedule for later" is selected, validate start time
+          if (scheduleLaterRadio.checked && !startTimeInput.value.trim()) {
+            // Prevent form submission
+            event.preventDefault();
+
+            // Make sure the schedule options are visible
+            scheduleOptions.classList.remove('d-none');
+
+            // Add visual indication that the field is required
+            startTimeInput.classList.add('is-invalid');
+
+            // Create error message if it doesn't exist
+            let errorMsg = document.getElementById('start-time-error');
+            if (!errorMsg) {
+              errorMsg = document.createElement('div');
+              errorMsg.id = 'start-time-error';
+              errorMsg.className = 'invalid-feedback';
+              errorMsg.textContent = 'Please enter a start time for the scheduled meeting.';
+              startTimeInput.parentNode.appendChild(errorMsg);
+            }
+
+            // Scroll to and focus on the start time input
+            startTimeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            startTimeInput.focus();
+          } else {
+            // Remove any error styling if the field is valid or not required
+            startTimeInput.classList.remove('is-invalid');
+          }
+        });
+
+        // Remove error styling when the user starts typing
+        startTimeInput.addEventListener('input', function () {
+          if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+          }
+        });
+      });
+    </script>
+</body>
+
+</html>

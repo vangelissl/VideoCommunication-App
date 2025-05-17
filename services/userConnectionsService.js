@@ -4,7 +4,7 @@ export const createUserConnection = async (userId, meetingSessionId, peerId, soc
 	return await db.UserConnection.create({
 		user_id: userId,
 		meeting_session_id: meetingSessionId,
-		peer_id: peer_id,
+		peer_id: peerId,
 		socket_id: socketId,
 	});
 };

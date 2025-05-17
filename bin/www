@@ -25,16 +25,6 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
-const io = new Server(server);
-
-io.on('connection', async (socket) => {
-  const userId = socket.handshake.auth.userId;  // should be passed from script
-  const meetingSessionId = socket.handshake.auth.meetingSessionId;  // should be passed from script
-  const peerId = v4();
-
-  await createUserConnection(userId, meetingSessionId, socket.id, peerId);
-
-});
 
 /**
  * Listen on provided port, on all network interfaces.
