@@ -73,5 +73,4 @@ export const revokeRefreshToken = async (userId) => {
 			user_id: userId,
 		}
 	});
-}
-
+};

@@ -10,6 +10,9 @@ import indexRouter from './routes/index.js';
 import usersRouter from './routes/users.js';
 import authRouter from './routes/auth.js';
 import profileRouter from './routes/profile.js';
+import roomPagesRouter from './routes/room.js';
+import roomApiRouter from './routes/api/rooms.js';
+
 import db from './models/db.js';
 
 import { authenticateToken, requireRole, redirectIfLoggedIn, getUserIfAuth } from './middleware/jwtAuth.js';
@@ -54,8 +57,13 @@ usersRouter.use(requireRole);
 
 profileRouter.use(authenticateToken);
 
+roomPagesRouter.use(authenticateToken);
+roomApiRouter.use(authenticateToken);
+
 app.use('/users', usersRouter);
 app.use('/profile', profileRouter);
+app.use('/room', roomPagesRouter);
+app.use('/api/room', roomApiRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

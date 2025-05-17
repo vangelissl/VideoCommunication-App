@@ -7,8 +7,9 @@
 import app from '../app.js'
 import createDebug from 'debug'
 import http from 'http'
+import { v4 } from 'uuid';
 import { Server } from 'socket.io';
-
+import { createUserConnection } from '../services/userConnectionsService.js';
 const debug = createDebug('videocomapp:server');
 
 /**
@@ -26,8 +27,13 @@ var server = http.createServer(app);
 
 const io = new Server(server);
 
-io.on('connection', (socket) => {
-  
+io.on('connection', async (socket) => {
+  const userId = socket.handshake.auth.userId;  // should be passed from script
+  const meetingSessionId = socket.handshake.auth.meetingSessionId;  // should be passed from script
+  const peerId = v4();
+
+  await createUserConnection(userId, meetingSessionId, socket.id, peerId);
+
 });
 
 /**

@@ -1,7 +1,7 @@
 import express from 'express';
-import * as userController from '../controllers/userController.js';
+import * as userController from '../../controllers/userController.js';
 import asyncHandler from 'express-async-handler';
-import { authenticateToken, requireRole } from '../middleware/jwtAuth.js';
+import { authenticateToken, requireRole } from '../../middleware/jwtAuth.js';
 const router = express.Router();
 
 
