@@ -46,7 +46,6 @@ const initDb = async () => {
 	// Load all models
 	for (const file of modelFiles) {
 		const fileUrl = pathToFileURL(path.join(__dirname, file));
-		console.log('Importing file:', fileUrl.href)
 		const modelModule = await import(fileUrl);
 		const model = modelModule.default;
 		db[model.name] = model;

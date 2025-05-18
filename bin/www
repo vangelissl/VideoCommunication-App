@@ -7,9 +7,7 @@
 import app from '../app.js'
 import createDebug from 'debug'
 import http from 'http'
-import { v4 } from 'uuid';
-import { Server } from 'socket.io';
-import { createUserConnection } from '../services/userConnectionsService.js';
+import { initSocket } from '../socket/socket.js';
 const debug = createDebug('videocomapp:server');
 
 /**
@@ -24,6 +22,12 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+/**
+ * Create socket.io server.
+ */
+
+initSocket(server);
 
 
 /**

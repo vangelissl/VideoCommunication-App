@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { createMeeting, createMeetingSettings, createMeetingSession, createMeetingParticipant } from "../services/roomService.js";
+import { findMeetingById, findMeetingSessionByMeetingId } from '../services/roomService.js';
 import dayjs from "dayjs";
 
 export const get_room_preferences = (req, res, next) => {
@@ -22,10 +23,14 @@ export const post_room_preferences = asyncHandler(async (req, res, next) => {
 		return new Date();
 	})();
 
+	console.log(starting_time);
+
 	const expected_end_time = (() => {
 		const time = new Date(starting_time.getTime());
-		return time.setMinutes(time.getMinutes() + req.body.duration);
+		time.setMinutes(time.getMinutes() + req.body.duration);
+		return time; 
 	})();
+	console.log(expected_end_time);
 
 	const meeting = await createMeeting({
 		hostId: user.id,
@@ -37,7 +42,7 @@ export const post_room_preferences = asyncHandler(async (req, res, next) => {
 		isRecurring: isRecurring,
 		recurrencePattern: isRecurring ? req.body.recurrence_pattern : null,
 		maxParticipants: req.body.max_participants,
-		is_active: false,
+		isActive: false,
 	});
 
 	const meetingSettings = await createMeetingSettings({
@@ -63,14 +68,26 @@ export const post_room_preferences = asyncHandler(async (req, res, next) => {
 			meetingId: meeting.id,
 			userId: user.id,
 			joinTime: meeting.start_time,
-			is_host: true,
+			isHost: true,
 		});
 
-		res.render('room', {
-			host: user,
-			meeting: meeting,
-			meetingSettings: meetingSettings,
-			meetingSession: meetingSession,
-		});
+		res.redirect(`/room/${meeting.id}`);
 	}
-})
+});
+
+export const get_room = asyncHandler(async (req, res, next) => {
+	const meetingId = req.params.roomId;
+	const user = req.user;
+
+	console.log(`req user is ${user}`);
+	console.log(`req user id ${user.id}`);
+
+	const meeting = await findMeetingById(meetingId);
+	const meetingSession = await findMeetingSessionByMeetingId(meetingId);
+
+	res.render('room', {
+		meetingId: meetingId,
+		meetingSession: meetingSession,
+		user: user,
+	});
+});

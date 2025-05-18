@@ -1,6 +1,16 @@
 import db from '../models/db.js';
 
-export const createMeeting = async (hostId, title, description, meetingPassword, startTime, expectedEndTime, isRecurring, recurrencePattern, maxParticipants, isActive) => {
+export const createMeeting = async ({
+	hostId,
+	title,
+	description,
+	meetingPassword,
+	startTime,
+	expectedEndTime,
+	isRecurring,
+	recurrencePattern,
+	maxParticipants,
+	isActive }) => {
 	return await db.Meeting.create({
 		host_id: hostId,
 		title: title,
@@ -15,7 +25,14 @@ export const createMeeting = async (hostId, title, description, meetingPassword,
 	});
 };
 
-export const createMeetingSettings = async (meetingId, waitingRoomEnabled, recordingEnabled, chatEnabled, screenSharingEnabled, participantAudioDefault, participantVideoDefault) => {
+export const createMeetingSettings = async ({
+	meetingId,
+	waitingRoomEnabled,
+	recordingEnabled,
+	chatEnabled,
+	screenSharingEnabled,
+	participantAudioDefault,
+	participantVideoDefault }) => {
 	return await db.MeetingSettings.create({
 		meeting_id: meetingId,
 		waiting_room_enabled: waitingRoomEnabled,
@@ -27,7 +44,10 @@ export const createMeetingSettings = async (meetingId, waitingRoomEnabled, recor
 	});
 };
 
-export const createMeetingSession = async (meetingId, startTime, numParticipants) => {
+export const createMeetingSession = async ({
+	meetingId,
+	startTime,
+	numParticipants }) => {
 	return await db.MeetingSession.create({
 		meeting_id: meetingId,
 		start_time: startTime,
@@ -35,11 +55,31 @@ export const createMeetingSession = async (meetingId, startTime, numParticipants
 	});
 };
 
-export const createMeetingParticipant = async (meetingId, userId, joinTime, isHost) => {
+export const createMeetingParticipant = async ({
+	meetingId,
+	userId,
+	joinTime,
+	isHost }) => {
 	return await db.MeetingParticipant.create({
 		meeting_id: meetingId,
 		user_id: userId,
 		join_time: joinTime,
 		is_host: isHost,
+	});
+};
+
+export const findMeetingById = async (meetingId) => {
+	return await db.Meeting.findOne({
+		where: {
+			id: meetingId,
+		},
+	});
+};
+
+export const findMeetingSessionByMeetingId = async (meetingId) => {
+	return await db.MeetingSession.findOne({
+		where: {
+			meeting_id: meetingId,
+		},
 	});
 };
