@@ -54,6 +54,8 @@ const initOnConnect = async () => {
 			socket.on('joinRoom', ({ roomId }) => {
 				socket.join(roomId);
 
+				socket.currentRoomId = roomId;
+
 				for (let i = 0; i < 20; i++) {
 					console.log('jOOOOOOOOOOOOOINED');
 				}
@@ -63,7 +65,7 @@ const initOnConnect = async () => {
 				socket.to(roomId).emit('userJoined', { socketId: socket.id, fullname });
 
 				// Also broadcast a system message to all in room (including this user)
-				socket.to(roomId).emit('publicMessage', {
+				socket.to(roomId).emit('joinMessage', {
 					message: `${fullname} has joined the room`,
 					recipient: null,
 					sender: 'System',
@@ -71,10 +73,19 @@ const initOnConnect = async () => {
 				});
 			});
 
+			socket.on('sendPublicMessage', ({ message, recipient, sender, timestamp }) => {
+				io.to(socket.currentRoomId).emit('publicMessage', {
+					message: message,
+					sender: sender,
+					recipient: recipient,
+					timestamp: timestamp,
+				});
+			});
+
 			socket.on('disconnect', async (socket) => {
 
 			});
-		} catch(error) {
+		} catch (error) {
 			console.error('Error during socket connection: ', error);
 		}
 	});
