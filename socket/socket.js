@@ -55,11 +55,7 @@ const initOnConnect = async () => {
 				socket.currentRoomId = roomId;
 
 				// Fetch all sockets in the room
-				const socketsInRoom = await io.in(roomId).fetchSockets();
-				const participants = socketsInRoom.map(s => ({
-					socketId: s.id,
-					fullname: s.handshake.auth.fullname
-				}));
+				const participants = await fetchParticipantsInRoom(roomId);
 
 				// Notify all users in the room with the current list of participants
 				io.to(roomId).emit('participantsUpdate', participants);
@@ -83,11 +79,28 @@ const initOnConnect = async () => {
 				});
 			});
 
-			socket.on('disconnect', async (socket) => {
-
+			socket.on('disconnect', async () => {
+				console.log('User disconnected');
+				const roomId = socket.currentRoomId;
+				if (roomId) {
+					const participants = await fetchParticipantsInRoom(roomId)
+					io.to(roomId).emit('participantsUpdate', participants);
+				}
 			});
 		} catch (error) {
 			console.error('Error during socket connection: ', error);
 		}
 	});
 };
+
+
+async function fetchParticipantsInRoom(roomId) {
+	const socketsInRoom = await io.in(roomId).fetchSockets();
+	const participants = socketsInRoom.map(s => ({
+		socketId: s.id,
+		fullname: s.handshake.auth.fullname
+	}));
+
+	return participants
+}
+
