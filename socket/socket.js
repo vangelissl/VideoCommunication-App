@@ -62,22 +62,30 @@ const initOnConnect = async () => {
 
 				// Broadcast to others in room that a user joined
 				socket.to(roomId).emit('userJoined', { socketId: socket.id, fullname });
-				socket.to(roomId).emit('joinMessage', {
-					message: `${fullname} has joined the room`,
-					recipient: null,
-					sender: 'System',
-					timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-				});
+				// socket.to(roomId).emit('joinMessage', {
+				// 	message: `${fullname} has joined the room`,
+				// 	recipient: null,
+				// 	sender: 'System',
+				// 	timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+				// });
+
+				sendMessage(
+					socket,
+					'joinMessage',
+					`${fullname} has joined the room`,
+					null,
+					'System',
+					new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+					true,
+				);
+
 			});
 
 			socket.on('sendPublicMessage', ({ message, recipient, sender, timestamp }) => {
-				io.to(socket.currentRoomId).emit('publicMessage', {
-					message: message,
-					sender: sender,
-					recipient: recipient,
-					timestamp: timestamp,
-				});
+				sendMessage(socket, 'publicMessage', message, recipient, sender, timestamp);
 			});
+
+
 
 			socket.on('disconnect', async () => {
 				console.log('User disconnected');
@@ -86,6 +94,16 @@ const initOnConnect = async () => {
 					const participants = await fetchParticipantsInRoom(roomId)
 					io.to(roomId).emit('participantsUpdate', participants);
 				}
+
+				sendMessage(
+					socket,
+					'joinMessage',
+					`${fullname} has left the room`,
+					null,
+					'System',
+					new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+					true,
+				);
 			});
 		} catch (error) {
 			console.error('Error during socket connection: ', error);
@@ -104,3 +122,13 @@ async function fetchParticipantsInRoom(roomId) {
 	return participants
 }
 
+function sendMessage(socket, event, message, recipient, sender, timestamp, self = false) {
+	const serverSender = self ? socket : io;
+
+	serverSender.to(socket.currentRoomId).emit(event, {
+		message: message,
+		sender: sender,
+		recipient: recipient,
+		timestamp: timestamp,
+	});
+}
