@@ -46,25 +46,26 @@ const initOnConnect = async () => {
 					peerId: peerId
 				});
 
-			console.log('some user was connected');
-
 			socket.currentRoomId = null;
 
 			// Handle user joining room where roomId is the meeting's id
-			socket.on('joinRoom', ({ roomId }) => {
+			socket.on('joinRoom', async ({ roomId }) => {
 				socket.join(roomId);
 
 				socket.currentRoomId = roomId;
 
-				for (let i = 0; i < 20; i++) {
-					console.log('jOOOOOOOOOOOOOINED');
-				}
-				console.log(`${fullname} is joining room ${roomId}`);
+				// Fetch all sockets in the room
+				const socketsInRoom = await io.in(roomId).fetchSockets();
+				const participants = socketsInRoom.map(s => ({
+					socketId: s.id,
+					fullname: s.handshake.auth.fullname
+				}));
+
+				// Notify all users in the room with the current list of participants
+				io.to(roomId).emit('participantsUpdate', participants);
 
 				// Broadcast to others in room that a user joined
 				socket.to(roomId).emit('userJoined', { socketId: socket.id, fullname });
-
-				// Also broadcast a system message to all in room (including this user)
 				socket.to(roomId).emit('joinMessage', {
 					message: `${fullname} has joined the room`,
 					recipient: null,

@@ -156,10 +156,27 @@
 				}, 500);
 			});
 
-			// Notify others in the room about new user
-			socket.on('userJoined', ({ socketId, fullname }) => {
-				console.log('User has joined the room');
-			});
+			socket.on('participantsUpdate', (participants) => {
+				videoGrid.innerHTML = '';  // Clear the video grid
+
+				participants.forEach(user => {
+					if (user.fullname !== currentUser) {
+						const option = document.createElement('option');
+						option.value = user.socketId;
+						option.textContent = user.fullname;
+						privateUserSelect.appendChild(option);
+					}
+
+					// Add video elements
+					const div = document.createElement('div');
+					div.classList.add('relative', 'bg-black', 'rounded-lg', 'overflow-hidden');
+					div.innerHTML = `
+						<video autoplay playsinline muted class="w-full h-48 object-cover"></video>
+						<p class="absolute bottom-2 left-2 text-white">${user.fullname === currentUser ? 'You' : user.fullname}</p>
+					`;
+					videoGrid.appendChild(div);
+				});
+			})
 
 			// Send message
 			sendMessage.addEventListener('click', () => {
@@ -196,12 +213,12 @@
 			div.classList.add('chat-message', 'p-2', 'rounded-lg', isSelf ? 'self' : 'other', isSelf ? 'ml-auto' : 'mr-auto');
 			const senderText = isSelf ? 'You' : sender;
 			div.innerHTML = `
-        <div class="flex justify-between text-xs mb-1">
-          <span>${senderText}${recipient ? ` to ${recipient}` : ''}</span>
-          <span>${timestamp}</span>
-        </div>
-        <div>${message}</div>
-      `;
+					<div class="flex justify-between text-xs mb-1">
+					<span>${senderText}${recipient ? ` to ${recipient}` : ''}</span>
+					<span>${timestamp}</span>
+					</div>
+					<div>${message}</div>
+				`;
 			container.appendChild(div);
 			container.scrollTop = container.scrollHeight;
 		}
@@ -223,23 +240,9 @@
 		const participantsList = document.getElementById('participantsList');
 		const videoGrid = document.getElementById('videoGrid');
 
-		// Mock participants
-		const participants = Array.from({ length: 30 }, (_, i) => `User ${i + 1}`);
-		participants.forEach(user => {
-			const option = document.createElement('option');
-			option.value = user;
-			option.textContent = user;
-			privateUserSelect.appendChild(option);
+		// // Mock participants
+		// const participants = Array.from({ length: 30 }, (_, i) => `User ${i + 1}`);
 
-			// Add mock video elements
-			const div = document.createElement('div');
-			div.classList.add('relative', 'bg-black', 'rounded-lg', 'overflow-hidden');
-			div.innerHTML = `
-        <video autoplay playsinline muted class="w-full h-48 object-cover"></video>
-        <p class="absolute bottom-2 left-2 text-white">${user}</p>
-      `;
-			videoGrid.appendChild(div);
-		});
 
 		// Tab switching
 		publicTab.addEventListener('click', () => {
