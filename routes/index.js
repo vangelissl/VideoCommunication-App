@@ -1,9 +1,13 @@
-var express = require('express');
+import express from 'express';
+import { getUserIfAuth } from '../middleware/jwtAuth.js';
 var router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get('/', getUserIfAuth, function (req, res, next) {
+	res.render('index', {
+		title: 'Home',
+		user: req.user,
+	});
 });
 
-module.exports = router;
+export default router;

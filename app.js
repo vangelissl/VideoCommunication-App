@@ -1,40 +1,34 @@
-require('dotenv').config({ path: '.env' });
+import 'dotenv/config';
+import createError from 'http-errors';
+import express from 'express';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
 
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+import indexRouter from './routes/index.js';
+import usersRouter from './routes/users.js';
+import authRouter from './routes/auth.js';
+import profileRouter from './routes/profile.js';
+import db from './models/db.js';
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+import { authenticateToken, requireRole, redirectIfLoggedIn, getUserIfAuth } from './middleware/jwtAuth.js';
+
 
 const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Connect to db
-const { Sequelize } = require('sequelize');
-
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'postgres',
-  dialectOptions: {
-    ssl: {
-      require: true,           // Enforce SSL
-      rejectUnauthorized: false // Allow self-signed certificates 
-    },
-  },
-});
-
-// Test connection to db
-async function testDbConnection() {
+async function connectDb() {
   try {
-    await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
+    await db.initialize();
+    console.log('Database initialized, server starting...');
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    console.error('Failed to initialize database:', error);
+    process.exit(1);
   }
 }
 
-testDbConnection();
+await connectDb();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -46,8 +40,22 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Public routes (no authentication required)
 app.use('/', indexRouter);
+app.use('/auth', authRouter);
+
+// Authentication check middleware (redirect use to forbid loggin or registering before logging out)
+authRouter.use(redirectIfLoggedIn);
+indexRouter.use(getUserIfAuth);
+
+// Authentication middleware (used for specific 'protected' routes)
+usersRouter.use(authenticateToken);
+usersRouter.use(requireRole);
+
+profileRouter.use(authenticateToken);
+
 app.use('/users', usersRouter);
+app.use('/profile', profileRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -65,4 +73,4 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+export default app;
