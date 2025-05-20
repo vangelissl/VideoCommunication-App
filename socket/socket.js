@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { createUserConnection } from '../services/userConnectionsService.js';
-import { createPrivateChatRoom, createPrivateMessage, createPublicChatMessage, findPrivateChatRoomByRoomKey } from '../services/chatService.js';
+import { createPrivateChatRoom, createPrivateMessage, createPublicChatMessage, findPrivateChatRoomByRoomKey, findPrivateChatRoomByRoomKeyAndMeetingId } from '../services/chatService.js';
 import { findUserById } from "../services/userService.js";
 import { v4 } from "uuid";
 
@@ -77,17 +77,22 @@ const initOnConnect = async () => {
 
 			});
 
+			// Handle public message sent
 			socket.on('sendPublicMessage', async ({ message, recipient, sender, timestamp }) => {
+				// Send message back to clients
 				sendMessage(socket, 'publicMessage', message, recipient, sender, timestamp);
 				console.log(socket.currentRoomId);
+				// Save message to db
 				await createPublicChatMessage(socket.currentRoomId, userId, message);
 			});
 
+			// Handle private message sent
 			socket.on('sendPrivateMessage', async ({ message, recipient, sender, timestamp }) => {
 				console.log('The recepient of the private message is: ', recipient);
 				console.log('the recipient socket id: ', recipient.socketId);
+
 				// Get private chat room if exists or create new
-				let privateChatRoom = await findPrivateChatRoomByRoomKey(sender.id, recipient.id);
+				let privateChatRoom = await findPrivateChatRoomByRoomKeyAndMeetingId(socket.currentRoomId, sender.id, recipient.id);
 				if (!privateChatRoom) {
 					console.log('meeting id on socket send private message is: ', socket.currentRoomId);
 					privateChatRoom = await createPrivateChatRoom(socket.currentRoomId, sender.id, recipient.id);
@@ -101,9 +106,25 @@ const initOnConnect = async () => {
 				// await createPrivateChatMessage()
 			});
 
-			socket.on('recipientChange', () => {
-				// implement getting messages in private chat with currentRecipient
-			})
+			// Handle change of private recipient 
+			socket.on('privateRecipientChanged', async ({ recipient, sender }) => {
+				console.log(sender);
+				// Find private room if exists or return
+				const privateChatRoom = await findPrivateChatRoomByRoomKeyAndMeetingId(socket.currentRoomId, sender.id, recipient.id);
+
+				if (!privateChatRoom)
+					return;
+				// Get all messages of private chat room from db
+				const messages = await privateChatRoom.getMessages();
+
+				// Send all messages back to client that emitted change of recipient
+				for (const message of messages) {
+					console.log('Message was fetched, message content: ', message.message_content);
+					sendPrivateMessage(socket, message.message_content, recipient, sender,
+						new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+						message.sender_id);
+				}
+			});
 
 			socket.on('disconnect', async () => {
 				console.log('User disconnected');
@@ -144,6 +165,11 @@ async function fetchParticipantsInRoom(roomId) {
 	return participants
 }
 
+async function findSocketByUserId(roomId, userId) {
+	const socketsInRoom = await io.in(roomId).fetchSockets();
+	return socketsInRoom.find(socket => socket.handshake.auth.userId === userId);
+}
+
 function sendMessage(socket, event, message, recipient, sender, timestamp, self = false) {
 	const serverSender = self ? socket : io;
 
@@ -155,19 +181,22 @@ function sendMessage(socket, event, message, recipient, sender, timestamp, self 
 	});
 }
 
-function sendPrivateMessage(socket, message, recipient, sender, timestamp, self = false) {
+function sendPrivateMessage(socket, message, recipient, sender, timestamp, realSenderId=null, self = false) {
 	const messageData = {
 		message: message,
-		recipient: recipient, 
+		recipient: recipient,
 		sender: sender,
 		timestamp: timestamp,
 		self: self,
+		realSenderId: realSenderId,
 	};
 
 	console.log('recipient just before the message is sent to him: ', recipient);
 	console.log('recipient socket id before sending to it: ', recipient.socketId);
-	
+
 	socket.emit('privateMessage', messageData); // to sender
 
-	socket.to(recipient.socketId).emit('privateMessage', messageData);  // to recipient socket
+	if (!realSenderId) {
+		socket.to(recipient.socketId).emit('privateMessage', messageData);  // to recipient socket
+	}
 }

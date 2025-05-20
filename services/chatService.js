@@ -52,6 +52,17 @@ export const findPrivateChatRoomByRoomKey = async (senderId, recipientId) => {
 	});
 };
 
+export const findPrivateChatRoomByRoomKeyAndMeetingId = async (meetingId, senderId, recipientId) => {
+	const roomKey = generateRoomKey(senderId, recipientId);
+
+	return await db.PrivateChatRoom.findOne({
+		where: {
+			meeting_id: meetingId,
+			room_key: roomKey,
+		},
+	});
+};
+
 export const findPrivateChatRoomMessages = async (privateChatRoomId) => {
 	const privateChatRoom = await db.findOne({
 		where: {

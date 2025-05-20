@@ -19,7 +19,6 @@ const PrivateChatRoom = db.sequelize.define("PrivateChatRoom", {
 	},
 	room_key: {
 		type: DataTypes.STRING,
-		unique: true,
 		allowNull: false
 	},
 	is_active: {

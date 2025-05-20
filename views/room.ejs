@@ -33,7 +33,7 @@
 
 		#publicChat,
 		#privateChat {
-			max-height: 600px;
+			max-height: 460px;
 			overflow-y: auto;
 		}
 	</style>
@@ -91,11 +91,12 @@
 			<!-- Private Chat -->
 			<div id="privateChat" class="flex-1 p-4 overflow-y-auto hidden">
 				<!-- User Selection -->
-				<select id="privateUserSelect"
-					class="w-full p-2 border rounded mb-4 bg-gray-800 text-white border-gray-600">
-					<option value="">Select a user</option>
-					<!-- Users will be added here dynamically -->
-				</select>
+				<div class="sticky top-0 bg-gray-700 z-10 pb-2">
+					<select id="privateUserSelect"
+						class="w-full p-2 border rounded bg-gray-800 text-white border-gray-600">
+						<option value="">Select a user</option>
+					</select>
+				</div>
 				<div id="privateMessages" class="space-y-2">
 					<!-- Private messages will be added here -->
 				</div>
@@ -157,9 +158,17 @@
 			});
 
 			// Add message to private chat on private message sent
-			socket.on('privateMessage', ({ message, recipient, sender, timestamp }) => {
-				const isSelf = sender.id === currentUser.id;
-				addMessage(privateMessages, message, isSelf, recipient, sender, timestamp);
+			socket.on('privateMessage', ({ message, recipient, sender, timestamp, realSenderId }) => {
+				if (realSenderId) {
+					if (realSenderId !== currentUser.id) {
+						addMessage(privateMessages, message, false, sender, recipient, timestamp);
+					} else {
+						addMessage(privateMessages, message, true, recipient, sender, timestamp);
+					}
+				} else {
+					const isSelf = sender.id === currentUser.id;
+					addMessage(privateMessages, message, isSelf, recipient, sender, timestamp);
+				}
 			});
 
 			// Notify server about user join
@@ -200,6 +209,22 @@
 					videoGrid.appendChild(div);
 				});
 			})
+
+			privateUserSelect.addEventListener('change', () => {
+				privateMessages.innerHTML = '';
+
+				const selectedValue = privateUserSelect.value;
+				if (!selectedValue) return;
+
+				const recipient = JSON.parse(selectedValue);
+
+				console.log(`Private chat target changed to: ${recipient.fullname} (Socket ID: ${recipient.socketId})`);
+
+				socket.emit('privateRecipientChanged', {
+					recipient,
+					sender: currentUser,
+				});
+			});
 
 			// Send message
 			sendMessage.addEventListener('click', () => {
@@ -243,12 +268,20 @@
 
 		// Add message to chat
 		function addMessage(container, message, isSelf, recipient = null, sender, timestamp) {
+			if (container === privateMessages) {
+				const privateRecipient = JSON.parse(privateUserSelect.value);
+				if (
+					privateRecipient.id !== recipient.id &&
+					privateRecipient.id !== sender.id
+				) return;
+			}
+
 			const div = document.createElement('div');
 			div.classList.add('chat-message', 'p-2', 'rounded-lg', isSelf ? 'self' : 'other', isSelf ? 'ml-auto' : 'mr-auto');
 			const senderText = isSelf ? 'You' : typeof sender !== 'string' ? sender.fullname : sender;
 			div.innerHTML = `
 					<div class="flex justify-between text-xs mb-1">
-					<span>${senderText}${recipient.id !== currentUser.id ? ` to ${recipient.fullname}` : 'You'}</span>
+					<span>${senderText}${recipient ? (recipient.id !== currentUser.id ? ` to ${recipient.fullname}` : ' to You') : ''}</span>
 					<span>${timestamp}</span>
 					</div>
 					<div>${message}</div>
