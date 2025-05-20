@@ -32,6 +32,53 @@
 			overflow-y: auto;
 		}
 
+		/* Screen sharing layout */
+		.screen-sharing-active #videoGrid {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto auto;
+		}
+
+		.screen-sharing-active #localVideoContainer {
+			grid-row: 1;
+			height: 70vh;
+		}
+
+		.screen-sharing-active #localVideoContainer video {
+			height: 100%;
+			object-fit: contain;
+			background-color: #000;
+		}
+
+		.screen-sharing-active #remoteVideosContainer {
+			grid-row: 2;
+			display: flex;
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			gap: 0.5rem;
+		}
+
+		.screen-sharing-active #remoteVideosContainer > div {
+			min-width: 160px;
+			max-width: 160px;
+		}
+
+		/* For smaller participant videos during screen sharing */
+		.participant-video-container {
+			position: relative;
+			background-color: black;
+			border-radius: 0.5rem;
+			overflow: hidden;
+		}
+
+		.participant-name {
+			position: absolute;
+			bottom: 0.5rem;
+			left: 0.5rem;
+			color: white;
+			font-size: 0.875rem;
+			text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+		}
+
 		#publicChat,
 		#privateChat {
 			max-height: 460px;
@@ -61,12 +108,13 @@
 		<div class="flex-1 bg-gray-800 rounded-lg p-4">
 			<h2 class="text-lg font-semibold mb-2">Participants</h2>
 			<div id="videoGrid" class="grid gap-4">
-				<!-- Video streams will be added here dynamically -->
-				<!-- Your local video will appear here -->
-				<div id="localVideoContainer" class="relative bg-black rounded-lg overflow-hidden">
+				<!-- Local video container -->
+				<div id="localVideoContainer" class="participant-video-container">
 					<video id="localVideo" autoplay playsinline muted class="w-full h-48 object-cover"></video>
-					<p class="absolute bottom-2 left-2 text-white">You</p>
+					<p class="participant-name">You</p>
 				</div>
+				<!-- Remote videos container -->
+				<div id="remoteVideosContainer" class="hidden"></div>
 			</div>
 		</div>
 
@@ -125,6 +173,7 @@
 	</script>
 
 	<script defer>
+		// Wait for DOM to be fully loaded
 		document.addEventListener('DOMContentLoaded', () => {
 			const rawData = document.getElementById('app-data').textContent;
 			const appData = JSON.parse(rawData);
@@ -178,11 +227,11 @@
 				navigator.mediaDevices.getUserMedia({ video: true, audio: true })
 					.then((stream) => {
 						localStream = stream;
-
+						
 						// Set the local video stream
 						if (localVideo) {
 							localVideo.srcObject = stream;
-
+							
 							// Make sure the video plays
 							localVideo.onloadedmetadata = (e) => {
 								localVideo.play().catch(err => {
@@ -215,7 +264,7 @@
 				muteButton.addEventListener('click', () => {
 					const audioTracks = stream.getAudioTracks();
 					if (audioTracks.length === 0) return;
-
+					
 					const isEnabled = audioTracks[0].enabled;
 					audioTracks[0].enabled = !isEnabled;
 					muteButton.textContent = isEnabled ? 'Unmute' : 'Mute';
@@ -225,7 +274,7 @@
 				videoButton.addEventListener('click', () => {
 					const videoTracks = stream.getVideoTracks();
 					if (videoTracks.length === 0) return;
-
+					
 					const isEnabled = videoTracks[0].enabled;
 					videoTracks[0].enabled = !isEnabled;
 					videoButton.textContent = isEnabled ? 'Video On' : 'Video Off';
@@ -276,10 +325,10 @@
 
 			// Update video grid to add only those users' videos that are in the room
 			socket.on('participantsUpdate', (participants) => {
-				// Remove all remote participants but keep local video
-				const remoteVideos = document.querySelectorAll('#videoGrid > div:not(#localVideoContainer)');
+				// Remove all remote participants 
+				const remoteVideos = document.querySelectorAll('.participant-video-container:not(#localVideoContainer)');
 				remoteVideos.forEach(el => el.remove());
-
+				
 				// Clear the participant select dropdown
 				privateUserSelect.innerHTML = '<option value="">Select a user</option>';
 
@@ -293,12 +342,18 @@
 
 						// Add remote participant videos
 						const div = document.createElement('div');
-						div.classList.add('relative', 'bg-black', 'rounded-lg', 'overflow-hidden');
+						div.classList.add('participant-video-container');
 						div.innerHTML = `
 							<video autoplay playsinline class="w-full h-48 object-cover"></video>
-							<p class="absolute bottom-2 left-2 text-white">${participant.fullname}</p>
+							<p class="participant-name">${participant.fullname}</p>
 						`;
-						videoGrid.appendChild(div);
+						
+						// Append to the right container based on screen sharing status
+						if (isScreenSharing) {
+							document.getElementById('remoteVideosContainer').appendChild(div);
+						} else {
+							videoGrid.appendChild(div);
+						}
 					}
 				});
 			});
@@ -369,7 +424,7 @@
 					// Only show messages for the selected private recipient
 					const privateRecipientValue = privateUserSelect.value;
 					if (!privateRecipientValue) return;
-
+					
 					const privateRecipient = JSON.parse(privateRecipientValue);
 					if (
 						privateRecipient.id !== recipient?.id &&
@@ -411,31 +466,80 @@
 			});
 
 			// Screen sharing functionality
+			let isScreenSharing = false;
+			let screenStream = null;
+			
 			shareScreen.addEventListener('click', async () => {
 				try {
-					const screenStream = await navigator.mediaDevices.getDisplayMedia({
-						video: true,
-						audio: true
-					});
-
-					// Replace camera with screen share in local video
-					if (localVideo) {
-						localVideo.srcObject = screenStream;
-					}
-
-					// Handle when user stops screen sharing
-					screenStream.getVideoTracks()[0].onended = () => {
-						if (localVideo && localStream) {
-							localVideo.srcObject = localStream;
+					if (!isScreenSharing) {
+						// Start screen sharing
+						screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+							video: true,
+							audio: true 
+						});
+						
+						// Save the previous video for later
+						const previousVideo = localVideo.srcObject;
+						
+						// Replace camera with screen share in local video
+						if (localVideo) {
+							localVideo.srcObject = screenStream;
 						}
-					};
-
-					alert('Screen sharing started. Click Stop Sharing in the browser controls to end.');
+						
+						// Apply screen sharing layout
+						document.body.classList.add('screen-sharing-active');
+						document.getElementById('remoteVideosContainer').classList.remove('hidden');
+						
+						// Move remote videos to the container
+						const remoteVideos = document.querySelectorAll('#videoGrid > .participant-video-container:not(#localVideoContainer)');
+						const remoteContainer = document.getElementById('remoteVideosContainer');
+						remoteVideos.forEach(video => {
+							remoteContainer.appendChild(video);
+						});
+						
+						// Set the screen sharing flag
+						isScreenSharing = true;
+						shareScreen.textContent = 'Stop Sharing';
+						
+						// Handle when user stops screen sharing
+						screenStream.getVideoTracks()[0].onended = () => {
+							stopScreenSharing(previousVideo);
+						};
+					} else {
+						// Stop screen sharing
+						if (screenStream) {
+							screenStream.getTracks().forEach(track => track.stop());
+						}
+						stopScreenSharing(localStream);
+					}
 				} catch (err) {
 					console.error('Error sharing screen:', err);
 					alert('Failed to start screen sharing.');
 				}
 			});
+			
+			function stopScreenSharing(originalStream) {
+				// Restore original video stream
+				if (localVideo && originalStream) {
+					localVideo.srcObject = originalStream;
+				}
+				
+				// Return to normal layout
+				document.body.classList.remove('screen-sharing-active');
+				
+				// Move remote videos back to main grid
+				const remoteVideos = document.querySelectorAll('#remoteVideosContainer > .participant-video-container');
+				remoteVideos.forEach(video => {
+					videoGrid.appendChild(video);
+				});
+				
+				document.getElementById('remoteVideosContainer').classList.add('hidden');
+				
+				// Reset screen sharing state
+				isScreenSharing = false;
+				shareScreen.textContent = 'Share Screen';
+				screenStream = null;
+			}
 
 			// Mock functionality for now
 			reactions.addEventListener('click', () => {
@@ -454,11 +558,11 @@
 					if (localStream) {
 						localStream.getTracks().forEach(track => track.stop());
 					}
-
+					
 					// Disconnect from socket and peer
 					socket.disconnect();
 					peer.destroy();
-
+					
 					// Redirect to home or meeting ended page
 					window.location.href = '/';
 				}
