@@ -550,17 +550,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// Mock functionality for now
-	reactions.addEventListener('click', () => {
-		alert('Reactions menu opened.');
-		// Add reactions logic here
-	});
-
-	participantsList.addEventListener('click', () => {
-		alert('Participants list opened.');
-		// Add participants list logic here
-	});
-
 	endCall.addEventListener('click', () => {
 		if (confirm('Are you sure you want to leave this meeting?')) {
 			// Stop all media tracks
@@ -576,7 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			peer.destroy();
 
 			// Redirect to home or meeting ended page
-			window.location.href = '/';
+			window.location.href = '/profile';
 		}
 	});
 });
