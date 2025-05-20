@@ -34,7 +34,22 @@ const initOnConnect = async () => {
 			const meetingId = socket.handshake.auth.meetingId;  // should be passed from script
 			const meetingSessionId = socket.handshake.auth.meetingSessionId;
 			const fullname = socket.handshake.auth.fullname; // or from your user store
-			const peerId = v4();
+
+			socket.on('peerId', async id => {
+				// Create user connection for this particular meeting session
+				const userConnection = await createUserConnection(
+					{
+						userId: userId,
+						meetingSessionId: meetingSessionId,
+						socketId: socket.id,
+						peerId: id
+					});
+				
+				// Save peer id to socket object
+				socket.peerId = id;
+
+				console.log('socket correctly received id of peer js: ', id);
+			})
 
 			socket.currentRoomId = meetingId;
 
@@ -43,14 +58,7 @@ const initOnConnect = async () => {
 			// Get full user object
 			const user = await findUserById(userId);
 
-			// Create user connection for this particular meeting session
-			const userConnection = await createUserConnection(
-				{
-					userId: userId,
-					meetingSessionId: meetingSessionId,
-					socketId: socket.id,
-					peerId: peerId
-				});
+
 
 			// Handle user joining room where roomId is the meeting's id
 			socket.on('joinRoom', async () => {
@@ -157,11 +165,6 @@ async function fetchParticipantsInRoom(roomId) {
 		id: s.handshake.auth.userId,
 	}));
 
-	for (const participant of participants) {
-		console.log('Current participant id is: ', participant.id);
-		console.log('Current participant socket id is: ', participant.socketId);
-	}
-
 	return participants
 }
 
@@ -181,7 +184,7 @@ function sendMessage(socket, event, message, recipient, sender, timestamp, self 
 	});
 }
 
-function sendPrivateMessage(socket, message, recipient, sender, timestamp, realSenderId=null, self = false) {
+function sendPrivateMessage(socket, message, recipient, sender, timestamp, realSenderId = null, self = false) {
 	const messageData = {
 		message: message,
 		recipient: recipient,
@@ -190,9 +193,6 @@ function sendPrivateMessage(socket, message, recipient, sender, timestamp, realS
 		self: self,
 		realSenderId: realSenderId,
 	};
-
-	console.log('recipient just before the message is sent to him: ', recipient);
-	console.log('recipient socket id before sending to it: ', recipient.socketId);
 
 	socket.emit('privateMessage', messageData); // to sender
 
