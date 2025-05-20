@@ -44,7 +44,7 @@ const initOnConnect = async () => {
 						socketId: socket.id,
 						peerId: id
 					});
-				
+
 				// Save peer id to socket object
 				socket.peerId = id;
 
@@ -134,6 +134,14 @@ const initOnConnect = async () => {
 				}
 			});
 
+			socket.on('startScreenShare', ({ presenterId, userName }) => {
+				socket.to(socket.currentRoomId).emit('screenShareStarted', { presenterId, userName });
+			});
+
+			socket.on('stopScreenShare', () => {
+				socket.to(socket.currentRoomId).emit('screenShareStopped');
+			});
+
 			socket.on('disconnect', async () => {
 				console.log('User disconnected');
 				if (socket.currentRoomId) {
@@ -163,6 +171,7 @@ async function fetchParticipantsInRoom(roomId) {
 		socketId: s.id,
 		fullname: s.handshake.auth.fullname,
 		id: s.handshake.auth.userId,
+		peerId: s.peerId,
 	}));
 
 	return participants
