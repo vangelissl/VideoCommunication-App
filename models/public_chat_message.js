@@ -39,16 +39,6 @@ const PublicChatMessage = db.sequelize.define("PublicChatMessage", {
 			isUrl: true,
 		},
 	},
-	is_pinned: {
-		type: DataTypes.BOOLEAN,
-		allowNull: false,
-		defaultValue: false,
-	},
-	is_deleted: {
-		type: DataTypes.BOOLEAN,
-		allowNull: false,
-		defaultValue: false,
-	},
 },
 	{
 		tableName: "public_chat_messages",

@@ -28,14 +28,6 @@ const PrivateChatRoomParticipant = db.sequelize.define("PrivateChatRoomParticipa
 		onDelete: "CASCADE",
 		onUpdate: "CASCADE",
 	},
-	joined_at: {
-		type: DataTypes.DATE,
-		allowNull: false,
-	},
-	left_at: {
-		type: DataTypes.DATE,
-		allowNull: true,
-	},
 },
 	{
 		tableName: "private_chat_room_participants",

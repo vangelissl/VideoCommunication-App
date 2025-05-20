@@ -29,7 +29,7 @@ const Meeting = db.sequelize.define("Meeting", {
 	meeting_link: {
 		type: DataTypes.VIRTUAL,
 		get() {
-			return `/room/${this.id}`;
+			return `/room/id:${this.id}`;
 		},
 	},
 	meeting_password: {

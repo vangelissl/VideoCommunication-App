@@ -46,7 +46,6 @@ const initDb = async () => {
 	// Load all models
 	for (const file of modelFiles) {
 		const fileUrl = pathToFileURL(path.join(__dirname, file));
-		console.log('Importing file:', fileUrl.href)
 		const modelModule = await import(fileUrl);
 		const model = modelModule.default;
 		db[model.name] = model;
@@ -122,7 +121,6 @@ async function setAssociations() {
 	User.hasMany(MeetingParticipant, { foreignKey: 'user_id', as: 'meetingParticipations' });
 	User.hasMany(PublicChatMessage, { foreignKey: 'sender_id', as: 'publicMessages' });
 	User.hasMany(PrivateChatMessage, { foreignKey: 'sender_id', as: 'privateMessages' });
-	User.hasMany(PrivateChatRoom, { foreignKey: 'creator_id', as: 'createdChatRooms' });
 	User.hasMany(PrivateChatRoomParticipant, { foreignKey: 'user_id', as: 'chatRoomParticipations' });
 	User.hasMany(UserConnection, { foreignKey: 'user_id', as: 'connections' });
 	User.hasMany(MeetingInvitation, { foreignKey: 'sender_id', as: 'sentInvitations' });
@@ -130,6 +128,7 @@ async function setAssociations() {
 	UserSettings.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 	UserConnection.belongsTo(User, { foreignKey: "user_id", as: "user" });
 	UserConnection.belongsTo(MeetingSession, { foreignKey: "meeting_session_id", as: "meetingSession" });
+
 	RefreshToken.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
 	PublicChatMessage.belongsTo(Meeting, { foreignKey: "meeting_id", as: "currentMeeting" });
@@ -137,7 +136,7 @@ async function setAssociations() {
 
 	PrivateChatRoom.hasMany(PrivateChatMessage, { foreignKey: "room_id", as: "messages" });
 	PrivateChatRoom.hasMany(PrivateChatRoomParticipant, { foreignKey: "room_id", as: "participants" });
-	PrivateChatRoom.belongsTo(User, { foreignKey: "creator_id", as: "creator" });
+	PrivateChatRoom.belongsTo(Meeting, {foreignKey: 'meeting_id', as: 'currentMeeting'});
 
 	PrivateChatRoomParticipant.belongsTo(User, { foreignKey: "user_id", as: "user" });
 	PrivateChatRoomParticipant.belongsTo(PrivateChatRoom, { foreignKey: "room_id", as: "chatRoom" });
@@ -151,6 +150,7 @@ async function setAssociations() {
 	Meeting.hasMany(MeetingSession, { foreignKey: 'meeting_id', as: 'sessions' });
 	Meeting.hasOne(MeetingSettings, { foreignKey: 'meeting_id', as: 'settings' });
 	Meeting.hasMany(MeetingInvitation, { foreignKey: 'meeting_id', as: 'invitations' });
+	Meeting.hasMany(PrivateChatRoom, {foreignKey: 'meeting_id', as: 'privateChatRooms'})
 
 	MeetingSettings.belongsTo(Meeting, { foreignKey: "meeting_id", as: "meeting" });
 	MeetingSession.belongsTo(Meeting, { foreignKey: 'meeting_id', as: 'meeting' });
