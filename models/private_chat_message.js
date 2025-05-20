@@ -32,16 +32,6 @@ const PrivateChatMessage = db.sequelize.define("PrivateChatMessage", {
 		type: DataTypes.TEXT,
 		allowNull: false,
 	},
-	is_read: {
-		type: DataTypes.BOOLEAN,
-		allowNull: false,
-		defaultValue: false,
-	},
-	is_deleted: {
-		type: DataTypes.BOOLEAN,
-		allowNull: false,
-		defaultValue: false,
-	},
 },
 	{
 		tableName: "private_chat_messages",

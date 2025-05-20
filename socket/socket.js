@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { createUserConnection } from '../services/userConnectionsService.js';
+import { createPrivateChatRoom, createPrivateMessage, createPublicChatMessage, findPrivateChatRoomByRoomKey } from '../services/chatService.js';
 import { findUserById } from "../services/userService.js";
 import { v4 } from "uuid";
 
@@ -30,9 +31,14 @@ const initOnConnect = async () => {
 	io.on('connection', async (socket) => {
 		try {
 			const userId = socket.handshake.auth.userId;  // should be passed from script
-			const meetingSessionId = socket.handshake.auth.meetingSessionId;  // should be passed from script
+			const meetingId = socket.handshake.auth.meetingId;  // should be passed from script
+			const meetingSessionId = socket.handshake.auth.meetingSessionId;
 			const fullname = socket.handshake.auth.fullname; // or from your user store
 			const peerId = v4();
+
+			socket.currentRoomId = meetingId;
+
+			console.log('meeting id in socket: ', meetingId);
 
 			// Get full user object
 			const user = await findUserById(userId);
@@ -46,28 +52,18 @@ const initOnConnect = async () => {
 					peerId: peerId
 				});
 
-			socket.currentRoomId = null;
-
 			// Handle user joining room where roomId is the meeting's id
-			socket.on('joinRoom', async ({ roomId }) => {
-				socket.join(roomId);
-
-				socket.currentRoomId = roomId;
+			socket.on('joinRoom', async () => {
+				socket.join(socket.currentRoomId);
 
 				// Fetch all sockets in the room
-				const participants = await fetchParticipantsInRoom(roomId);
+				const participants = await fetchParticipantsInRoom(socket.currentRoomId);
 
 				// Notify all users in the room with the current list of participants
-				io.to(roomId).emit('participantsUpdate', participants);
+				io.to(socket.currentRoomId).emit('participantsUpdate', participants);
 
 				// Broadcast to others in room that a user joined
-				socket.to(roomId).emit('userJoined', { socketId: socket.id, fullname });
-				// socket.to(roomId).emit('joinMessage', {
-				// 	message: `${fullname} has joined the room`,
-				// 	recipient: null,
-				// 	sender: 'System',
-				// 	timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-				// });
+				socket.to(socket.currentRoomId).emit('userJoined', { socketId: socket.id, fullname });
 
 				sendMessage(
 					socket,
@@ -81,18 +77,39 @@ const initOnConnect = async () => {
 
 			});
 
-			socket.on('sendPublicMessage', ({ message, recipient, sender, timestamp }) => {
+			socket.on('sendPublicMessage', async ({ message, recipient, sender, timestamp }) => {
 				sendMessage(socket, 'publicMessage', message, recipient, sender, timestamp);
+				console.log(socket.currentRoomId);
+				await createPublicChatMessage(socket.currentRoomId, userId, message);
 			});
 
+			socket.on('sendPrivateMessage', async ({ message, recipient, sender, timestamp }) => {
+				console.log('The recepient of the private message is: ', recipient);
+				console.log('the recipient socket id: ', recipient.socketId);
+				// Get private chat room if exists or create new
+				let privateChatRoom = await findPrivateChatRoomByRoomKey(sender.id, recipient.id);
+				if (!privateChatRoom) {
+					console.log('meeting id on socket send private message is: ', socket.currentRoomId);
+					privateChatRoom = await createPrivateChatRoom(socket.currentRoomId, sender.id, recipient.id);
+				}
 
+				// Create private message
+				const privateMessage = await createPrivateMessage(privateChatRoom.id, sender.id, message);
+
+				// Send private message back to clients
+				sendPrivateMessage(socket, message, recipient, sender, timestamp);
+				// await createPrivateChatMessage()
+			});
+
+			socket.on('recipientChange', () => {
+				// implement getting messages in private chat with currentRecipient
+			})
 
 			socket.on('disconnect', async () => {
 				console.log('User disconnected');
-				const roomId = socket.currentRoomId;
-				if (roomId) {
-					const participants = await fetchParticipantsInRoom(roomId)
-					io.to(roomId).emit('participantsUpdate', participants);
+				if (socket.currentRoomId) {
+					const participants = await fetchParticipantsInRoom(socket.currentRoomId)
+					io.to(socket.currentRoomId).emit('participantsUpdate', participants);
 				}
 
 				sendMessage(
@@ -111,13 +128,18 @@ const initOnConnect = async () => {
 	});
 };
 
-
 async function fetchParticipantsInRoom(roomId) {
 	const socketsInRoom = await io.in(roomId).fetchSockets();
 	const participants = socketsInRoom.map(s => ({
 		socketId: s.id,
-		fullname: s.handshake.auth.fullname
+		fullname: s.handshake.auth.fullname,
+		id: s.handshake.auth.userId,
 	}));
+
+	for (const participant of participants) {
+		console.log('Current participant id is: ', participant.id);
+		console.log('Current participant socket id is: ', participant.socketId);
+	}
 
 	return participants
 }
@@ -131,4 +153,21 @@ function sendMessage(socket, event, message, recipient, sender, timestamp, self 
 		recipient: recipient,
 		timestamp: timestamp,
 	});
+}
+
+function sendPrivateMessage(socket, message, recipient, sender, timestamp, self = false) {
+	const messageData = {
+		message: message,
+		recipient: recipient, 
+		sender: sender,
+		timestamp: timestamp,
+		self: self,
+	};
+
+	console.log('recipient just before the message is sent to him: ', recipient);
+	console.log('recipient socket id before sending to it: ', recipient.socketId);
+	
+	socket.emit('privateMessage', messageData); // to sender
+
+	socket.to(recipient.socketId).emit('privateMessage', messageData);  // to recipient socket
 }

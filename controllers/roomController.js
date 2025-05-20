@@ -23,14 +23,11 @@ export const post_room_preferences = asyncHandler(async (req, res, next) => {
 		return new Date();
 	})();
 
-	console.log(starting_time);
-
 	const expected_end_time = (() => {
 		const time = new Date(starting_time.getTime());
 		time.setMinutes(time.getMinutes() + req.body.duration);
 		return time; 
 	})();
-	console.log(expected_end_time);
 
 	const meeting = await createMeeting({
 		hostId: user.id,
@@ -79,10 +76,6 @@ export const get_room = asyncHandler(async (req, res, next) => {
 	const meetingId = req.params.roomId;
 	const user = req.user;
 
-	console.log(`req user is ${user}`);
-	console.log(`req user id ${user.id}`);
-
-	const meeting = await findMeetingById(meetingId);
 	const meetingSession = await findMeetingSessionByMeetingId(meetingId);
 
 	res.render('room', {

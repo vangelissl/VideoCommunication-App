@@ -114,65 +114,88 @@
 		</div>
 	</div>
 
-	<script defer>
-		window.appData = {
-			user: <%- JSON.stringify(user) %>,
-			meetingSession: <%- JSON.stringify(meetingSession) %>,
-			meetingId: '<%= meetingId %>',
-		};
+	<script id="app-data" type="application/json">
+		<%- JSON.stringify({
+			user,
+			meetingSession,
+			meetingId
+		}) %>
+	</script>
 
-		const { user, meetingSession, meetingId } = window.appData;
+	<script defer>
+
+		const rawData = document.getElementById('app-data').textContent;
+		const appData = JSON.parse(rawData);
+
+		const { user, meetingSession, meetingId } = appData;
+
+		console.log("the meeting in client is ", meetingId);
+
 		// Current user (for demo purposes)
-		const currentUser = user.fullname;
+		const currentUser = user;
 
 		window.addEventListener('DOMContentLoaded', () => {
 			const socket = io('http://localhost:3000', {
 				auth: {
 					userId: user.id,
+					meetingId: meetingId,
 					meetingSessionId: meetingSession.id,
 					fullname: user.fullname,
 				}
 			});
 
+			// Add message to chat on user join
 			socket.on('joinMessage', ({ message, recipient, sender, timestamp }) => {
 				console.log('Message was sent to chat');
-				const isSelf = sender === currentUser;
-				addMessage(publicMessages, message, isSelf, recipient, sender, timestamp);
+				addMessage(publicMessages, message, false, recipient, sender, timestamp);
 			});
 
+			// Add message to public chat on public message sent
 			socket.on('publicMessage', ({ message, recipient, sender, timestamp }) => {
-				const isSelf = sender === currentUser;
+				const isSelf = sender.id === currentUser.id;
 				addMessage(publicMessages, message, isSelf, recipient, sender, timestamp);
 			});
 
+			// Add message to private chat on private message sent
+			socket.on('privateMessage', ({ message, recipient, sender, timestamp }) => {
+				const isSelf = sender.id === currentUser.id;
+				addMessage(privateMessages, message, isSelf, recipient, sender, timestamp);
+			});
+
+			// Notify server about user join
 			socket.on('connect', () => {
 				console.log('Connected to Socket.IO server with userId:', user.fullname);
 				console.log('Current room is ', meetingId);
 				// Join the room on connection
 				setTimeout(() => {
-					const roomId = meetingId;
-					console.log('📤 Emitting joinRoom with roomId:', roomId);
-					socket.emit('joinRoom', { roomId });
+					socket.emit('joinRoom');
 				}, 500);
 			});
 
+			// Update video grid to add only those users' videos that are in the room
 			socket.on('participantsUpdate', (participants) => {
 				videoGrid.innerHTML = '';  // Clear the video grid
+				privateUserSelect.innerHTML = '<option value="">Select a user</option>';
 
 				participants.forEach(user => {
-					if (user.fullname !== currentUser) {
+					if (user.id !== currentUser.id) {
 						const option = document.createElement('option');
-						option.value = user.socketId;
+						option.value = JSON.stringify(user);
+						console.log('Option value looks like this: ', option.value);
 						option.textContent = user.fullname;
 						privateUserSelect.appendChild(option);
 					}
+
+					console.log('Fetched user id is: ', user.id);
+					console.log('Fetched user socket id is: ', user.socketId);
+
 
 					// Add video elements
 					const div = document.createElement('div');
 					div.classList.add('relative', 'bg-black', 'rounded-lg', 'overflow-hidden');
 					div.innerHTML = `
 						<video autoplay playsinline muted class="w-full h-48 object-cover"></video>
-						<p class="absolute bottom-2 left-2 text-white">${user.fullname === currentUser ? 'You' : user.fullname}</p>
+						<p class="absolute bottom-2 left-2 text-white">${user.id === currentUser.id ? 'You' : user.fullname}</p>
 					`;
 					videoGrid.appendChild(div);
 				});
@@ -186,19 +209,30 @@
 				const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 				if (!privateChat.classList.contains('hidden')) {
-					const recipient = privateUserSelect.value;
-					if (!recipient) {
+					const recipientValue = privateUserSelect.value;
+					if (!recipientValue) {
 						alert('Please select a user to send a private message.');
 						return;
 					}
-					addMessage(privateMessages, message, true, recipient, currentUser, timestamp);
+					const recipient = JSON.parse(recipientValue);
+					console.log('Parsed recipient looks like this: ', recipient);
+					console.log('Socket id of parsed: ', recipient.socketId);
+
+					console.log('Private message is about to be sent to ', recipient.fullname);
+					// Emit sending private message to server
+					socket.emit('sendPrivateMessage', {
+						message,
+						recipient,
+						sender: currentUser,
+						timestamp,
+					});
 				} else {
 					// Emit sending public message to server
 					socket.emit('sendPublicMessage', {
-						message: message,
+						message,
 						recipient: null,
 						sender: currentUser,
-						timestamp: timestamp,
+						timestamp,
 					});
 				}
 
@@ -211,10 +245,10 @@
 		function addMessage(container, message, isSelf, recipient = null, sender, timestamp) {
 			const div = document.createElement('div');
 			div.classList.add('chat-message', 'p-2', 'rounded-lg', isSelf ? 'self' : 'other', isSelf ? 'ml-auto' : 'mr-auto');
-			const senderText = isSelf ? 'You' : sender;
+			const senderText = isSelf ? 'You' : typeof sender !== 'string' ? sender.fullname : sender;
 			div.innerHTML = `
 					<div class="flex justify-between text-xs mb-1">
-					<span>${senderText}${recipient ? ` to ${recipient}` : ''}</span>
+					<span>${senderText}${recipient.id !== currentUser.id ? ` to ${recipient.fullname}` : 'You'}</span>
 					<span>${timestamp}</span>
 					</div>
 					<div>${message}</div>
@@ -263,17 +297,7 @@
 			publicChat.classList.add('hidden');
 		});
 
-
-
-		// // Mock incoming messages
-		// setInterval(() => {
-		//   if (!publicChat.classList.contains('hidden')) {
-		//     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-		//     addMessage(publicMessages, 'Hey, how’s it going?', false, null, 'Alice', timestamp);
-		//   }
-		// }, 5000);
-
-		// Button actions (placeholders for real functionality)
+		// Button actions 
 		let isMuted = false;
 		muteButton.addEventListener('click', () => {
 			isMuted = !isMuted;

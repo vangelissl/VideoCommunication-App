@@ -7,15 +7,20 @@ const PrivateChatRoom = db.sequelize.define("PrivateChatRoom", {
 		defaultValue: DataTypes.UUIDV4,
 		primaryKey: true,
 	},
-	creator_id: {
+	meeting_id: {
 		type: DataTypes.UUID,
 		allowNull: false,
 		references: {
-			model: "users",
+			model: "meetings",
 			key: "id",
 		},
 		onDelete: "CASCADE",
 		onUpdate: "CASCADE",
+	},
+	room_key: {
+		type: DataTypes.STRING,
+		unique: true,
+		allowNull: false
 	},
 	is_active: {
 		type: DataTypes.BOOLEAN,
